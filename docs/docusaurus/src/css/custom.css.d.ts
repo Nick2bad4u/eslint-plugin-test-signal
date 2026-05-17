@@ -24,9 +24,9 @@ declare const styles: {
     readonly "sb-cat-rules-weak": string;
     readonly "sb-doc-getting-started": string;
     readonly "sb-doc-overview": string;
-    readonly "sb-inline-rule-number": string;
     readonly "sb-inline-runtime-kind": string;
     readonly "sb-preset-all": string;
+    readonly "sb-preset-experimental": string;
     readonly "sb-preset-minimal": string;
     readonly "sb-preset-recommended": string;
     readonly "sb-preset-recommended-type-checked": string;

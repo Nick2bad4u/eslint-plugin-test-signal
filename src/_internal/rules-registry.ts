@@ -7,6 +7,8 @@ import type { TSESLint } from "@typescript-eslint/utils";
 
 import type { TestSignalRuleNamePattern } from "./rule-catalog.js";
 
+import noAssertionsInHooksRule from "../rules/no-assertions-in-hooks.js";
+import noAsyncForeachAssertionsRule from "../rules/no-async-foreach-assertions.js";
 import noConditionalAssertionsRule from "../rules/no-conditional-assertions.js";
 import noDisabledTestsRule from "../rules/no-disabled-tests.js";
 import noEmptyAsyncTestsRule from "../rules/no-empty-async-tests.js";
@@ -29,6 +31,8 @@ export type RuleWithDocs = TSESLint.RuleModule<string>;
 const testSignalRuleRegistry: Readonly<
     Record<TestSignalRuleNamePattern, RuleWithDocs>
 > = {
+    "no-assertions-in-hooks": noAssertionsInHooksRule,
+    "no-async-foreach-assertions": noAsyncForeachAssertionsRule,
     "no-conditional-assertions": noConditionalAssertionsRule,
     "no-disabled-tests": noDisabledTestsRule,
     "no-empty-async-tests": noEmptyAsyncTestsRule,

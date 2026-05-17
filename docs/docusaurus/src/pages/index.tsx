@@ -56,7 +56,7 @@ const heroBadges = [
 const heroStats = [
     {
         description: "Focused coverage for the weakest test signals.",
-        headline: "\uf0ca 5 Rules",
+        headline: "\uf0ca 14 Rules",
     },
     {
         description: "Start small, then scale to stricter coverage.",

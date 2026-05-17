@@ -70,17 +70,6 @@ function isRuntimeSidebarLink(link: HTMLAnchorElement): boolean {
 }
 
 /**
- * Check whether a sidebar link belongs to a numbered rules subsection.
- *
- * @param link - Candidate sidebar link.
- *
- * @returns `true` when link is in the rules sidebar.
- */
-function isNumberedRuleSidebarLink(link: HTMLAnchorElement): boolean {
-    return link.closest(".sb-cat-rules") !== null;
-}
-
-/**
  * Detect runtime kind prefix in a sidebar label.
  *
  * @param label - Trimmed sidebar label.
@@ -97,38 +86,6 @@ function getRuntimeSidebarKindPrefix(
     }
 
     return null;
-}
-
-/**
- * Parse an optional numeric rule prefix from a sidebar label.
- *
- * @param label - Trimmed sidebar label.
- *
- * @returns Number token and remainder when label begins with digits.
- */
-function getRuleNumberPrefix(
-    label: string
-): null | Readonly<{ numberToken: string; remainder: string }> {
-    const match = /^(\d{2,3})\s+(.+)$/.exec(label);
-
-    if (match === null) {
-        return null;
-    }
-
-    const [
-        ,
-        numberToken,
-        remainder,
-    ] = match;
-
-    if (numberToken === undefined || remainder === undefined) {
-        return null;
-    }
-
-    return {
-        numberToken,
-        remainder,
-    };
 }
 
 /**
@@ -224,23 +181,6 @@ function applySidebarLabelTokenColoring(): CleanupFunction {
                 }
             }
 
-            if (isNumberedRuleSidebarLink(link)) {
-                const ruleNumberPrefix = getRuleNumberPrefix(linkLabel);
-
-                if (ruleNumberPrefix !== null) {
-                    mutations.push({
-                        element: link,
-                        originalLabel: linkLabel,
-                    });
-
-                    setSidebarLeadingToken({
-                        link,
-                        remainderText: ruleNumberPrefix.remainder,
-                        tokenClassName: "sb-inline-rule-number",
-                        tokenText: ruleNumberPrefix.numberToken,
-                    });
-                }
-            }
         }
     };
 

@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 
 type SidebarDocItem = {
+    readonly className?: string;
     readonly id: string;
     readonly label: string;
     readonly type: "doc";
@@ -33,28 +34,11 @@ const ruleDocIds = allRuleDocIds.filter(
         ruleDocId.startsWith("no-") || ruleDocId.startsWith("require-")
 );
 
-const ruleNumberByDocId = new Map<string, number>(
-    ruleDocIds.map((ruleDocId, index) => [ruleDocId, index + 1])
-);
-
-const toNumberedRuleLabel = (ruleNumber: number, ruleDocId: string): string =>
-    `${String(ruleNumber).padStart(2, "0")} ${ruleDocId}`;
-
-const ruleItems: SidebarDocItem[] = ruleDocIds.map((ruleDocId) => {
-    const ruleNumber = ruleNumberByDocId.get(ruleDocId);
-
-    if (ruleNumber === undefined) {
-        throw new TypeError(
-            `Missing stable sidebar rule number for '${ruleDocId}'.`
-        );
-    }
-
-    return {
-        id: ruleDocId,
-        label: toNumberedRuleLabel(ruleNumber, ruleDocId),
-        type: "doc",
-    };
-});
+const ruleItems: SidebarDocItem[] = ruleDocIds.map((ruleDocId) => ({
+    id: ruleDocId,
+    label: ruleDocId,
+    type: "doc",
+}));
 
 const sidebars = {
     rules: [
@@ -126,31 +110,37 @@ const sidebars = {
             type: "category",
             items: [
                 {
+                    className: "sb-preset-minimal",
                     id: "presets/minimal",
                     label: "Minimal",
                     type: "doc",
                 },
                 {
+                    className: "sb-preset-recommended",
                     id: "presets/recommended",
                     label: "Recommended",
                     type: "doc",
                 },
                 {
+                    className: "sb-preset-recommended-type-checked",
                     id: "presets/recommended-type-checked",
                     label: "Recommended Type Checked",
                     type: "doc",
                 },
                 {
+                    className: "sb-preset-strict",
                     id: "presets/strict",
                     label: "Strict",
                     type: "doc",
                 },
                 {
+                    className: "sb-preset-all",
                     id: "presets/all",
                     label: "All",
                     type: "doc",
                 },
                 {
+                    className: "sb-preset-experimental",
                     id: "presets/experimental",
                     label: "Experimental",
                     type: "doc",

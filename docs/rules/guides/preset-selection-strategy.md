@@ -1,6 +1,6 @@
 # Preset Selection Strategy
 
-Use `minimal` when a suite has many asynchronous tests and unknown Promise
+Use `minimal` when a suite has frequent asynchronous tests and unknown Promise
 assertion quality.
 
 Use `recommended` for day-to-day development once the suite is healthy enough to

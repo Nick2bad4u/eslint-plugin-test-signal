@@ -12,20 +12,20 @@
     background:
         radial-gradient(
             circle at 86% 12%,
-            rgb(244 114 182 / 28%),
+            rgb(251 191 36 / 24%),
             transparent 40%
         ),
         radial-gradient(
             circle at 16% 90%,
-            rgb(34 211 238 / 30%),
+            rgb(45 212 191 / 32%),
             transparent 45%
         ),
         linear-gradient(
             134deg,
-            #312e81 0%,
-            #4338ca 38%,
-            #3b82f6 72%,
-            #22d3ee 100%
+            #042f2e 0%,
+            #0f3f3c 38%,
+            #0f766e 72%,
+            #f59e0b 100%
         );
     border-block-end: 1px solid rgb(255 255 255 / 18%);
     color: #ffffff;
@@ -94,7 +94,7 @@
     border-radius: 999rem;
     margin: 0 0 0.75rem;
     background: rgb(15 23 42 / 28%);
-    color: rgb(224 231 255);
+    color: rgb(204 251 241);
     font-size: 0.79rem;
     font-weight: 700;
     letter-spacing: 0.07em;
@@ -154,15 +154,15 @@
 }
 
 .heroInlineLinkSnapshot {
-    border-color: rgb(196 181 253 / 58%);
-    background: rgb(91 33 182 / 30%);
-    color: rgb(243 232 255);
+    border-color: rgb(94 234 212 / 58%);
+    background: rgb(15 118 110 / 30%);
+    color: rgb(204 251 241);
 
     &:hover,
     &:focus {
-        border-color: rgb(216 180 254 / 82%);
-        background: rgb(126 34 206 / 38%);
-        color: rgb(250 245 255);
+        border-color: rgb(94 234 212 / 82%);
+        background: rgb(13 148 136 / 38%);
+        color: rgb(240 253 250);
     }
 }
 
@@ -290,16 +290,18 @@
 }
 
 .heroActionPrimary {
-    border-color: rgb(224 231 255 / 36%);
+    border-color: rgb(204 251 241 / 38%);
     background:
-        linear-gradient(145deg, rgb(129 140 248 / 90%), rgb(99 102 241 / 90%)),
+        linear-gradient(145deg, rgb(20 184 166 / 92%), rgb(15 118 110 / 92%)),
         linear-gradient(180deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 0%));
-    color: rgb(232 239 255);
+    background-color: #0f766e;
+    color: rgb(236 253 245);
 
     &:hover,
     &:focus {
-        border-color: rgb(224 231 255 / 50%);
-        color: rgb(242 246 255);
+        border-color: rgb(204 251 241 / 56%);
+        background-color: #0d9488;
+        color: rgb(240 253 250);
     }
 }
 
@@ -460,8 +462,8 @@
     background:
         linear-gradient(
             165deg,
-            rgb(79 70 229 / 10%),
-            rgb(14 165 233 / 8%) 56%,
+            rgb(15 118 110 / 10%),
+            rgb(245 158 11 / 8%) 56%,
             transparent
         ),
         var(--live-stats-section-background-color);
@@ -480,10 +482,10 @@
 
     display: inline-flex;
     padding: 0.2rem 0.56rem;
-    border: 1px solid rgb(79 70 229 / 24%);
+    border: 1px solid rgb(15 118 110 / 24%);
     border-radius: 999rem;
     margin: 0;
-    background: rgb(79 70 229 / 10%);
+    background: rgb(15 118 110 / 10%);
     color: var(--live-stats-kicker-color);
     font-size: 0.75rem;
     font-weight: 700;
@@ -525,8 +527,8 @@
     background:
         linear-gradient(
             170deg,
-            rgb(79 70 229 / 7%),
-            rgb(14 165 233 / 6%) 48%,
+            rgb(15 118 110 / 7%),
+            rgb(245 158 11 / 6%) 48%,
             transparent
         ),
         var(--card-background-color);
@@ -547,7 +549,7 @@
 
     &:hover,
     &:focus {
-        border-color: rgb(99 102 241 / 35%);
+        border-color: rgb(15 118 110 / 35%);
         box-shadow: var(--card-shadow-hover);
         transform: translateY(-2px);
     }
@@ -571,7 +573,7 @@
     justify-content: center;
     border-radius: 0.6rem;
     margin: 0;
-    background: rgb(79 70 229 / 14%);
+    background: rgb(15 118 110 / 14%);
     block-size: 1.9rem;
     font-family:
         "NerdFontSymbols Nerd Font Symbols", "Symbols Nerd Font Mono",

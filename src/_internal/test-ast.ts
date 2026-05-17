@@ -13,7 +13,11 @@ const focusedTestFunctionNames = new Set(["fdescribe", "fit"]);
 /** Modifiers that focus a test or suite and hide surrounding coverage. */
 const focusedTestModifiers = new Set(["only"]);
 /** Legacy disabled aliases used by Jest/Vitest-style test frameworks. */
-const disabledTestFunctionNames = new Set(["xdescribe", "xit", "xtest"]);
+const disabledTestFunctionNames = new Set([
+    "xdescribe",
+    "xit",
+    "xtest",
+]);
 /** Modifiers that should not be linted as executable test bodies. */
 const skippedTestModifiers = new Set(["skip", "todo"]);
 /** Assertion method names that only check mock invocation wiring. */
@@ -92,11 +96,21 @@ export type TestCallback =
     | TSESTree.ArrowFunctionExpression
     | TSESTree.FunctionExpression;
 
+type FunctionLikeNode =
+    | TSESTree.ArrowFunctionExpression
+    | TSESTree.FunctionDeclaration
+    | TSESTree.FunctionExpression;
+
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
     typeof value === "object" && value !== null;
 
 const isAstNode = (value: unknown): value is TSESTree.Node =>
     isRecord(value) && typeof value["type"] === "string";
+
+const isFunctionLikeNode = (node: TSESTree.Node): node is FunctionLikeNode =>
+    node.type === AST_NODE_TYPES.ArrowFunctionExpression ||
+    node.type === AST_NODE_TYPES.FunctionDeclaration ||
+    node.type === AST_NODE_TYPES.FunctionExpression;
 
 const getPropertyName = (
     // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- ESTree node types are supplied by typescript-eslint as mutable parser objects.
@@ -334,6 +348,65 @@ export const visitDescendants = (
     visitNode(node, visitor, new WeakSet<object>());
 };
 
+const visitNodeOutsideNestedFunctions = (
+    node: TSESTree.Node,
+    root: TSESTree.Node,
+    visitor: (child: TSESTree.Node) => void,
+    seen: WeakSet<object>
+): void => {
+    if (seen.has(node)) {
+        return;
+    }
+
+    seen.add(node);
+    visitor(node);
+
+    if (node !== root && isFunctionLikeNode(node)) {
+        return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- ESTree nodes are traversed through their enumerable child fields.
+    const nodeRecord = node as unknown as Readonly<Record<string, unknown>>;
+
+    for (const [key, value] of Object.entries(nodeRecord)) {
+        if (
+            key === "parent" ||
+            key === "tokens" ||
+            key === "comments" ||
+            key === "loc" ||
+            key === "range"
+        ) {
+            continue;
+        }
+
+        if (Array.isArray(value)) {
+            for (const item of value) {
+                if (isAstNode(item)) {
+                    visitNodeOutsideNestedFunctions(item, root, visitor, seen);
+                }
+            }
+
+            continue;
+        }
+
+        if (isAstNode(value)) {
+            visitNodeOutsideNestedFunctions(value, root, visitor, seen);
+        }
+    }
+};
+
+/**
+ * Visit descendants under a starting AST node without entering nested function
+ * bodies. This keeps per-test and per-hook checks tied to code that actually
+ * runs in that callback.
+ */
+export const visitDescendantsOutsideNestedFunctions = (
+    node: TSESTree.Node,
+    visitor: (child: TSESTree.Node) => void
+): void => {
+    visitNodeOutsideNestedFunctions(node, node, visitor, new WeakSet<object>());
+};
+
 /**
  * Check whether a call expression is the root `expect(...)` call in an
  * assertion chain.
@@ -341,6 +414,37 @@ export const visitDescendants = (
 export const isExpectCall = (node: TSESTree.CallExpression): boolean =>
     node.callee.type === AST_NODE_TYPES.Identifier &&
     node.callee.name === "expect";
+
+/**
+ * Check whether a call expression is rooted at the global `expect` API.
+ */
+export const isExpectLikeCall = (node: TSESTree.CallExpression): boolean =>
+    isExpectCall(node) ||
+    (node.callee.type === AST_NODE_TYPES.MemberExpression &&
+        node.callee.object.type === AST_NODE_TYPES.Identifier &&
+        node.callee.object.name === "expect");
+
+/**
+ * Check whether a node contains an `expect(...)` or `expect.*(...)` call
+ * without entering nested function bodies.
+ */
+export const containsExpectCallOutsideNestedFunctions = (
+    node: TSESTree.Node
+): boolean => {
+    let containsExpectCall = false;
+
+    visitDescendantsOutsideNestedFunctions(node, (descendant) => {
+        if (
+            !containsExpectCall &&
+            descendant.type === AST_NODE_TYPES.CallExpression &&
+            isExpectLikeCall(descendant)
+        ) {
+            containsExpectCall = true;
+        }
+    });
+
+    return containsExpectCall;
+};
 
 const findExpectCallInAssertionChain = (
     node: TSESTree.Node
@@ -464,10 +568,7 @@ export const assertionChainHasProperty = (
         ) {
             const propertyName = getPropertyName(parent.property);
 
-            if (
-                propertyName !== undefined &&
-                propertyNames.has(propertyName)
-            ) {
+            if (propertyName !== undefined && propertyNames.has(propertyName)) {
                 return true;
             }
         }

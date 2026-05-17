@@ -31,13 +31,16 @@ export type TestSignalRuleNamePattern =
     | "no-conditional-assertions"
     | "no-try-catch-assertions"
     | "no-weak-truthy-assertions"
-    | "require-error-message-assertions";
+    | "require-error-message-assertions"
+    | "no-async-foreach-assertions"
+    | "no-assertions-in-hooks";
 /* eslint-enable perfectionist/sort-union-types -- Resume regular union ordering outside the stable catalog list. */
 
 /**
  * Stable global ordering used for rule catalog IDs.
  *
- * @remarks Append new rules to preserve existing IDs.
+ * @remarks
+ * Append new rules to preserve existing IDs.
  */
 /* eslint-disable perfectionist/sort-arrays -- Keep this in stable catalog order so existing rule IDs never change. */
 const orderedRuleNames = [
@@ -53,6 +56,8 @@ const orderedRuleNames = [
     "no-try-catch-assertions",
     "no-weak-truthy-assertions",
     "require-error-message-assertions",
+    "no-async-foreach-assertions",
+    "no-assertions-in-hooks",
 ] as const satisfies readonly TestSignalRuleNamePattern[];
 /* eslint-enable perfectionist/sort-arrays -- Resume regular array ordering outside the stable catalog list. */
 
@@ -63,8 +68,7 @@ const toRuleCatalogId = (ruleNumber: number): TestSignalRuleCatalogId =>
 
 const isTestSignalRuleNamePattern = (
     ruleName: string
-): ruleName is TestSignalRuleNamePattern =>
-    orderedRuleNameSet.has(ruleName);
+): ruleName is TestSignalRuleNamePattern => orderedRuleNameSet.has(ruleName);
 
 /**
  * Canonical catalog metadata entries in stable display/order form.
@@ -127,9 +131,7 @@ export const getRuleCatalogEntryForRuleName = (
 export const testSignalRuleCatalogByRuleId: ReadonlyMap<
     TestSignalRuleCatalogId,
     TestSignalRuleCatalogEntry
-> = new Map(
-    testSignalRuleCatalogEntries.map((entry) => [entry.ruleId, entry])
-);
+> = new Map(testSignalRuleCatalogEntries.map((entry) => [entry.ruleId, entry]));
 
 /**
  * Resolve stable catalog metadata for a catalog id.

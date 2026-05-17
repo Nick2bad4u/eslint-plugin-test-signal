@@ -5,6 +5,37 @@ import { describe, expect, it } from "vitest";
 const readWorkspaceFile = (relativePath: string): string =>
     fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
 
+const siteDocsDirectory = path.join(process.cwd(), "docs/docusaurus/site-docs");
+
+const getExistingDocPath = (docId: string): string | undefined => {
+    const exactMarkdownPath = path.join(siteDocsDirectory, `${docId}.md`);
+
+    if (fs.existsSync(exactMarkdownPath)) {
+        return exactMarkdownPath;
+    }
+
+    const indexMarkdownPath = path.join(siteDocsDirectory, docId, "index.md");
+
+    if (fs.existsSync(indexMarkdownPath)) {
+        return indexMarkdownPath;
+    }
+
+    const docDirectoryPath = path.dirname(path.join(siteDocsDirectory, docId));
+    const docBaseName = path.basename(docId);
+
+    if (!fs.existsSync(docDirectoryPath)) {
+        return undefined;
+    }
+
+    return fs
+        .readdirSync(docDirectoryPath)
+        .find(
+            (entryName) =>
+                /^\d+-/v.test(entryName) &&
+                entryName.endsWith(`${docBaseName}.md`)
+        );
+};
+
 describe("docusaurus site configuration integrity", () => {
     it("uses canonical blob editUrl bases for rules/docs/blog/pages", () => {
         expect.hasAssertions();
@@ -38,13 +69,11 @@ describe("docusaurus site configuration integrity", () => {
         for (const developerDocId of developerDocIds) {
             expect(developerDocId).toBeDefined();
 
-            const resolvedTargetPath = path.resolve(
-                process.cwd(),
-                "docs/docusaurus/site-docs",
-                `${developerDocId}.md`
-            );
+            if (developerDocId === undefined) {
+                continue;
+            }
 
-            expect(fs.existsSync(resolvedTargetPath)).toBeTruthy();
+            expect(getExistingDocPath(developerDocId)).toBeDefined();
         }
     });
 });
