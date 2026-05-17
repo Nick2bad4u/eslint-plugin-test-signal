@@ -3,34 +3,33 @@
  * Type-level contract tests for public plugin exports.
  */
 import type {
-    TypefestConfigName,
-    TypefestPlugin,
-    TypefestRuleId,
-    TypefestRuleName,
-} from "eslint-plugin-typefest";
+    TestSignalConfigName,
+    TestSignalPlugin,
+    TestSignalRuleId,
+    TestSignalRuleName,
+} from "eslint-plugin-test-signal";
 
 import { assertType } from "vitest";
 
 const validConfigName = "recommended-type-checked";
 
-assertType<TypefestConfigName>(validConfigName);
-// @ts-expect-error Invalid preset key must not satisfy TypefestConfigName.
-assertType<TypefestConfigName>("recommendedTypeChecked");
+assertType<TestSignalConfigName>(validConfigName);
+// @ts-expect-error Invalid preset key must not satisfy TestSignalConfigName.
+assertType<TestSignalConfigName>("recommendedTypeChecked");
 
-const validRuleId = "typefest/prefer-type-fest-arrayable";
+const validRuleId = "test-signal/no-empty-async-tests";
 
-assertType<TypefestRuleId>(validRuleId);
-// @ts-expect-error Rule ids must include the `typefest/` namespace prefix.
-assertType<TypefestRuleId>("prefer-type-fest-arrayable");
+assertType<TestSignalRuleId>(validRuleId);
+// @ts-expect-error Rule ids must include the `test-signal/` namespace prefix.
+assertType<TestSignalRuleId>("no-empty-async-tests");
 
-type RuleNameFromRuleId = TypefestRuleId extends `typefest/${infer RuleName}`
-    ? RuleName
-    : never;
+type RuleNameFromRuleId =
+    TestSignalRuleId extends `test-signal/${infer RuleName}` ? RuleName : never;
 
-declare const pluginContract: TypefestPlugin;
+declare const pluginContract: TestSignalPlugin;
 
-assertType<TypefestRuleName>(
-    "prefer-type-fest-arrayable" satisfies RuleNameFromRuleId
+assertType<TestSignalRuleName>(
+    "no-empty-async-tests" satisfies RuleNameFromRuleId
 );
 assertType(pluginContract.configs.recommended);
 assertType(pluginContract.configs.all);

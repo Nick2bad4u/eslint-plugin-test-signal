@@ -2,9 +2,6 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { describe, expect, it } from "vitest";
 
-const chartIndexBulletPattern =
-    /^- \[[^\n\r]+\]\(\.\/(?<chartFile>[^\n\r]+\.md)\)$/v;
-
 const readWorkspaceFile = (relativePath: string): string =>
     fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
 
@@ -28,41 +25,23 @@ describe("docusaurus site configuration integrity", () => {
         expect(docusaurusConfigSource).not.toContain("/blog/blog/");
     });
 
-    it("charts index uses linked chart entries with existing local files", () => {
+    it("developer sidebar points at existing local docs", () => {
         expect.hasAssertions();
 
-        const chartsIndexRelativePath =
-            "docs/docusaurus/site-docs/developer/charts/index.md";
-        const chartsIndexSource = readWorkspaceFile(chartsIndexRelativePath);
+        const sidebarSource = readWorkspaceFile("docs/docusaurus/sidebars.ts");
+        const developerDocIds = [
+            ...sidebarSource.matchAll(/id:\s*"(?<docId>developer\/[^"]+)"/gv),
+        ].map((match) => match.groups?.["docId"]);
 
-        const sectionHeader = "## Chart set";
-        const sectionStart = chartsIndexSource.indexOf(sectionHeader);
+        expect(developerDocIds.length).toBeGreaterThan(0);
 
-        expect(sectionStart).toBeGreaterThanOrEqual(0);
-
-        const sectionBody = chartsIndexSource
-            .slice(sectionStart + sectionHeader.length)
-            .trim();
-
-        const bulletLines = sectionBody
-            .split(/\r?\n/v)
-            .map((line) => line.trim())
-            .filter((line) => line.startsWith("- "));
-
-        expect(bulletLines.length).toBeGreaterThan(0);
-
-        for (const bulletLine of bulletLines) {
-            expect(bulletLine).toMatch(chartIndexBulletPattern);
-
-            const linkMatch = chartIndexBulletPattern.exec(bulletLine);
-            const chartFile = linkMatch?.groups?.["chartFile"];
-
-            expect(chartFile).toBeDefined();
+        for (const developerDocId of developerDocIds) {
+            expect(developerDocId).toBeDefined();
 
             const resolvedTargetPath = path.resolve(
                 process.cwd(),
-                "docs/docusaurus/site-docs/developer/charts",
-                chartFile ?? ""
+                "docs/docusaurus/site-docs",
+                `${developerDocId}.md`
             );
 
             expect(fs.existsSync(resolvedTargetPath)).toBeTruthy();

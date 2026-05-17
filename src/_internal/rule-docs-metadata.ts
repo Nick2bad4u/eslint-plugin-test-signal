@@ -3,25 +3,18 @@
  * Derivation helpers for canonical rule docs metadata.
  */
 import type { TSESLint } from "@typescript-eslint/utils";
-import type { UnknownArray, UnknownRecord } from "type-fest";
 
 import {
-    arrayIncludes,
-    isDefined,
-    isEmpty,
-    isInteger,
-    objectEntries,
-} from "ts-extras";
-
-import type { TypefestRuleNamePattern } from "./rules-registry.js";
-
+    testSignalRuleCatalogEntries,
+    type TestSignalRuleNamePattern,
+} from "./rule-catalog.js";
 import { createRuleDocsUrl } from "./rule-docs-url.js";
 import {
-    isTypefestConfigReference,
-    type TypefestConfigName,
-    type TypefestConfigReference,
-    typefestConfigReferenceToName,
-} from "./typefest-config-references.js";
+    isTestSignalConfigReference,
+    type TestSignalConfigName,
+    type TestSignalConfigReference,
+    testSignalConfigReferenceToName,
+} from "./test-signal-config-references.js";
 
 /** Normalized docs metadata derived for each rule. */
 export type RuleDocsMetadata = Readonly<{
@@ -30,122 +23,68 @@ export type RuleDocsMetadata = Readonly<{
     requiresTypeChecking: boolean;
     ruleId: string;
     ruleNumber: number;
-    typefestConfigNames: readonly TypefestConfigName[];
-    typefestConfigReferences: readonly TypefestConfigReference[];
+    testSignalConfigNames: readonly TestSignalConfigName[];
+    testSignalConfigReferences: readonly TestSignalConfigReference[];
     url: string;
 }>;
 
 /** Rule-name keyed metadata map derived from static docs contracts. */
 export type RuleDocsMetadataByName = Readonly<
-    Record<TypefestRuleNamePattern, RuleDocsMetadata>
+    Record<TestSignalRuleNamePattern, RuleDocsMetadata>
 >;
 
 /** Rule-map contract accepted by docs metadata derivation helpers. */
 type RuleMap = Readonly<
-    Record<
-        TypefestRuleNamePattern,
-        TSESLint.RuleModule<string, Readonly<UnknownArray>>
-    >
+    Record<TestSignalRuleNamePattern, TSESLint.RuleModule<string>>
 >;
 
-/**
- * Canonical docs contract required on every plugin rule.
- */
-type TypefestRuleDocsContract = Readonly<{
+type TestSignalRuleDocsContract = Readonly<{
     description: string;
     recommended: boolean;
     requiresTypeChecking: boolean;
     ruleId: string;
     ruleNumber: number;
-    typefestConfigs:
-        | readonly TypefestConfigReference[]
-        | TypefestConfigReference;
+    testSignalConfigs:
+        | readonly TestSignalConfigReference[]
+        | TestSignalConfigReference;
     url: string;
 }>;
 
-const RULE_ID_PREFIX = "R" as const;
-const RULE_ID_LENGTH = 4 as const;
-const RULE_ID_DIGIT_START_INDEX = 1 as const;
-const ASCII_ZERO_CODE_POINT = 48 as const;
-const ASCII_NINE_CODE_POINT = 57 as const;
-
-/**
- * Guard dynamic rule ids to the canonical `R###` identifier contract.
- */
-const isRuleIdInCanonicalFormat = (value: string): boolean => {
-    if (value.length !== RULE_ID_LENGTH || !value.startsWith(RULE_ID_PREFIX)) {
-        return false;
-    }
-
-    for (const character of value.slice(RULE_ID_DIGIT_START_INDEX)) {
-        const codePoint = character.codePointAt(0);
-
-        if (!isDefined(codePoint)) {
-            return false;
-        }
-
-        if (
-            codePoint < ASCII_ZERO_CODE_POINT ||
-            codePoint > ASCII_NINE_CODE_POINT
-        ) {
-            return false;
-        }
-    }
-
-    return true;
-};
-
-/**
- * Guard dynamic values to object-shaped records.
- */
-const isUnknownRecord = (value: unknown): value is Readonly<UnknownRecord> =>
+const isUnknownRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
     typeof value === "object" && value !== null && !Array.isArray(value);
 
-/**
- * Convert rule docs `typefestConfigs` into a normalized, deduped reference
- * list.
- */
-const normalizeTypefestConfigReferences = (
+const normalizeConfigReferences = (
     ruleName: string,
-    typefestConfigs: TypefestRuleDocsContract["typefestConfigs"]
-): readonly TypefestConfigReference[] => {
-    const candidates =
-        typeof typefestConfigs === "string"
-            ? [typefestConfigs]
-            : [...typefestConfigs];
-
-    const references: TypefestConfigReference[] = [];
+    configs: TestSignalRuleDocsContract["testSignalConfigs"]
+): readonly TestSignalConfigReference[] => {
+    const candidates = typeof configs === "string" ? [configs] : [...configs];
+    const references: TestSignalConfigReference[] = [];
 
     for (const candidate of candidates) {
-        if (!isTypefestConfigReference(candidate)) {
+        if (!isTestSignalConfigReference(candidate)) {
             throw new TypeError(
-                `Rule '${ruleName}' has invalid docs.typefestConfigs reference '${String(candidate)}'.`
+                `Rule '${ruleName}' has invalid docs.testSignalConfigs reference '${String(candidate)}'.`
             );
         }
 
-        if (arrayIncludes(references, candidate)) {
-            continue;
+        if (!references.includes(candidate)) {
+            references.push(candidate);
         }
-
-        references.push(candidate);
     }
 
-    if (isEmpty(references)) {
+    if (references.length === 0) {
         throw new TypeError(
-            `Rule '${ruleName}' must declare at least one docs.typefestConfigs reference.`
+            `Rule '${ruleName}' must declare at least one docs.testSignalConfigs reference.`
         );
     }
 
     return references;
 };
 
-/**
- * Validate and narrow dynamic `meta.docs` values to the plugin docs contract.
- */
 const getRuleDocsContract = (
     ruleName: string,
     docs: unknown
-): TypefestRuleDocsContract => {
+): TestSignalRuleDocsContract => {
     if (!isUnknownRecord(docs)) {
         throw new TypeError(`Rule '${ruleName}' must declare meta.docs.`);
     }
@@ -155,25 +94,12 @@ const getRuleDocsContract = (
     const requiresTypeChecking = docs["requiresTypeChecking"];
     const ruleId = docs["ruleId"];
     const ruleNumber = docs["ruleNumber"];
-    const typefestConfigs = docs["typefestConfigs"];
+    const testSignalConfigs = docs["testSignalConfigs"];
     const url = docs["url"];
 
     if (typeof description !== "string" || description.trim().length === 0) {
         throw new TypeError(
             `Rule '${ruleName}' must declare a non-empty docs.description.`
-        );
-    }
-
-    if (typeof url !== "string" || url.trim().length === 0) {
-        throw new TypeError(
-            `Rule '${ruleName}' must declare a non-empty docs.url.`
-        );
-    }
-
-    const expectedRuleDocsUrl = createRuleDocsUrl(ruleName);
-    if (url !== expectedRuleDocsUrl) {
-        throw new TypeError(
-            `Rule '${ruleName}' must declare docs.url as '${expectedRuleDocsUrl}'.`
         );
     }
 
@@ -191,8 +117,7 @@ const getRuleDocsContract = (
 
     if (
         typeof ruleId !== "string" ||
-        !isRuleIdInCanonicalFormat(ruleId) ||
-        ruleId.trim().length === 0
+        !/^R\d{3}$/v.test(ruleId)
     ) {
         throw new TypeError(
             `Rule '${ruleName}' must declare docs.ruleId using the 'R###' format.`
@@ -201,7 +126,7 @@ const getRuleDocsContract = (
 
     if (
         typeof ruleNumber !== "number" ||
-        !isInteger(ruleNumber) ||
+        !Number.isInteger(ruleNumber) ||
         ruleNumber < 1
     ) {
         throw new TypeError(
@@ -209,10 +134,16 @@ const getRuleDocsContract = (
         );
     }
 
-    if (typeof typefestConfigs === "string") {
-        if (!isTypefestConfigReference(typefestConfigs)) {
+    if (typeof url !== "string" || url !== createRuleDocsUrl(ruleName)) {
+        throw new TypeError(
+            `Rule '${ruleName}' must declare docs.url as '${createRuleDocsUrl(ruleName)}'.`
+        );
+    }
+
+    if (typeof testSignalConfigs === "string") {
+        if (!isTestSignalConfigReference(testSignalConfigs)) {
             throw new TypeError(
-                `Rule '${ruleName}' has invalid docs.typefestConfigs reference '${typefestConfigs}'.`
+                `Rule '${ruleName}' has invalid docs.testSignalConfigs reference '${testSignalConfigs}'.`
             );
         }
 
@@ -222,30 +153,30 @@ const getRuleDocsContract = (
             requiresTypeChecking,
             ruleId,
             ruleNumber,
-            typefestConfigs,
+            testSignalConfigs,
             url,
         };
     }
 
-    if (!Array.isArray(typefestConfigs)) {
+    if (!Array.isArray(testSignalConfigs)) {
         throw new TypeError(
-            `Rule '${ruleName}' must declare docs.typefestConfigs as a preset reference or array.`
+            `Rule '${ruleName}' must declare docs.testSignalConfigs as a preset reference or array.`
         );
     }
 
-    const normalizedTypefestConfigs: TypefestConfigReference[] = [];
+    const normalizedTestSignalConfigs: TestSignalConfigReference[] = [];
 
-    for (const candidate of typefestConfigs) {
+    for (const configReference of testSignalConfigs) {
         if (
-            typeof candidate !== "string" ||
-            !isTypefestConfigReference(candidate)
+            typeof configReference !== "string" ||
+            !isTestSignalConfigReference(configReference)
         ) {
             throw new TypeError(
-                `Rule '${ruleName}' has invalid docs.typefestConfigs reference '${String(candidate)}'.`
+                `Rule '${ruleName}' has invalid docs.testSignalConfigs reference '${String(configReference)}'.`
             );
         }
 
-        normalizedTypefestConfigs.push(candidate);
+        normalizedTestSignalConfigs.push(configReference);
     }
 
     return {
@@ -254,7 +185,7 @@ const getRuleDocsContract = (
         requiresTypeChecking,
         ruleId,
         ruleNumber,
-        typefestConfigs: normalizedTypefestConfigs,
+        testSignalConfigs: normalizedTestSignalConfigs,
         url,
     };
 };
@@ -265,19 +196,19 @@ const getRuleDocsContract = (
 export const deriveRuleDocsMetadataByName = (
     rules: RuleMap
 ): RuleDocsMetadataByName => {
-    const metadataByRuleName: Record<
-        TypefestRuleNamePattern,
-        RuleDocsMetadata
+    const metadataByRuleName: Partial<
+        Record<TestSignalRuleNamePattern, RuleDocsMetadata>
     > = {};
 
-    for (const [ruleName, ruleModule] of objectEntries(rules)) {
+    for (const { ruleName } of testSignalRuleCatalogEntries) {
+        const ruleModule = rules[ruleName];
         const ruleDocs = getRuleDocsContract(ruleName, ruleModule.meta.docs);
-        const typefestConfigReferences = normalizeTypefestConfigReferences(
+        const testSignalConfigReferences = normalizeConfigReferences(
             ruleName,
-            ruleDocs.typefestConfigs
+            ruleDocs.testSignalConfigs
         );
-        const typefestConfigNames = typefestConfigReferences.map(
-            (reference) => typefestConfigReferenceToName[reference]
+        const testSignalConfigNames = testSignalConfigReferences.map(
+            (reference) => testSignalConfigReferenceToName[reference]
         );
 
         metadataByRuleName[ruleName] = {
@@ -286,13 +217,14 @@ export const deriveRuleDocsMetadataByName = (
             requiresTypeChecking: ruleDocs.requiresTypeChecking,
             ruleId: ruleDocs.ruleId,
             ruleNumber: ruleDocs.ruleNumber,
-            typefestConfigNames,
-            typefestConfigReferences,
+            testSignalConfigNames,
+            testSignalConfigReferences,
             url: ruleDocs.url,
         };
     }
 
-    return metadataByRuleName;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Every key is populated from the canonical rule catalog before returning.
+    return metadataByRuleName as RuleDocsMetadataByName;
 };
 
 /**
@@ -300,15 +232,15 @@ export const deriveRuleDocsMetadataByName = (
  */
 export const deriveTypeCheckedRuleNameSet = (
     ruleDocsMetadataByName: RuleDocsMetadataByName
-): ReadonlySet<TypefestRuleNamePattern> => {
-    const ruleNames: TypefestRuleNamePattern[] = [];
+): ReadonlySet<TestSignalRuleNamePattern> => {
+    const ruleNames: TestSignalRuleNamePattern[] = [];
 
-    for (const [ruleName, metadata] of objectEntries(ruleDocsMetadataByName)) {
-        if (!metadata.requiresTypeChecking) {
-            continue;
+    for (const { ruleName } of testSignalRuleCatalogEntries) {
+        const metadata = ruleDocsMetadataByName[ruleName];
+
+        if (metadata.requiresTypeChecking) {
+            ruleNames.push(ruleName);
         }
-
-        ruleNames.push(ruleName);
     }
 
     return new Set(ruleNames);
@@ -319,21 +251,21 @@ export const deriveTypeCheckedRuleNameSet = (
  */
 export const deriveRulePresetMembershipByRuleName = (
     ruleDocsMetadataByName: RuleDocsMetadataByName
-): Readonly<Record<TypefestRuleNamePattern, readonly TypefestConfigName[]>> => {
-    const membershipByRuleName: Record<
-        TypefestRuleNamePattern,
-        readonly TypefestConfigName[]
+): Readonly<
+    Record<TestSignalRuleNamePattern, readonly TestSignalConfigName[]>
+> => {
+    const membershipByRuleName: Partial<
+        Record<TestSignalRuleNamePattern, readonly TestSignalConfigName[]>
     > = {};
 
-    for (const [ruleName, metadata] of objectEntries(ruleDocsMetadataByName)) {
-        membershipByRuleName[ruleName] = metadata.typefestConfigNames;
+    for (const { ruleName } of testSignalRuleCatalogEntries) {
+        const metadata = ruleDocsMetadataByName[ruleName];
+
+        membershipByRuleName[ruleName] = metadata.testSignalConfigNames;
     }
 
-    if (isEmpty(objectEntries(membershipByRuleName))) {
-        throw new TypeError(
-            "Rule metadata derivation produced no membership entries."
-        );
-    }
-
-    return membershipByRuleName;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Every key is populated from the canonical rule catalog before returning.
+    return membershipByRuleName as Readonly<
+        Record<TestSignalRuleNamePattern, readonly TestSignalConfigName[]>
+    >;
 };

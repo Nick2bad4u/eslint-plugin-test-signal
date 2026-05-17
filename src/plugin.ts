@@ -1,77 +1,58 @@
 /**
  * @packageDocumentation
- * Public plugin entrypoint for eslint-plugin-typefest exports and preset wiring.
+ * Public plugin entrypoint for eslint-plugin-test-signal exports and preset wiring.
  */
 import type { ESLint, Linter } from "eslint";
-import type { Except } from "type-fest";
 
 import typeScriptParser from "@typescript-eslint/parser";
-import {
-    isDefined,
-    isEmpty,
-    objectEntries,
-    objectHasIn,
-    safeCastTo,
-    setHas,
-} from "ts-extras";
 
-// eslint-disable-next-line import-x/extensions -- Avoid importing from the ESM entrypoint to preserve CJS compatibility
+// eslint-disable-next-line import-x/extensions -- Avoid importing from the ESM entrypoint to preserve CJS compatibility.
 import packageJson from "../package.json" with { type: "json" };
+import { testSignalRuleCatalogEntries } from "./_internal/rule-catalog.js";
 import {
     deriveRuleDocsMetadataByName,
     deriveRulePresetMembershipByRuleName,
     deriveTypeCheckedRuleNameSet,
 } from "./_internal/rule-docs-metadata.js";
-import { typefestRules } from "./_internal/rules-registry.js";
+import { testSignalRules } from "./_internal/rules-registry.js";
 import {
-    type TypefestConfigName as InternalTypefestConfigName,
-    typefestConfigMetadataByName,
-} from "./_internal/typefest-config-references.js";
+    type TestSignalConfigName as InternalTestSignalConfigName,
+    testSignalConfigMetadataByName,
+    testSignalConfigNames,
+} from "./_internal/test-signal-config-references.js";
 
 /** ESLint severity used by generated preset rule maps. */
 const ERROR_SEVERITY = "error" as const;
 
 /** Default file globs targeted by plugin presets when `files` is omitted. */
-const TYPE_SCRIPT_FILES = ["**/*.{ts,tsx,mts,cts}"] as const;
+const TYPE_SCRIPT_TEST_FILES = [
+    "**/*.{test,spec}.{js,jsx,ts,tsx,mjs,cjs,mts,cts}",
+    "**/__tests__/**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}",
+] as const;
 
-/**
- * Canonical flat-config preset keys exposed through `plugin.configs`.
- *
- * @remarks
- * These names are used by consumers when composing presets in ESLint flat
- * config arrays.
- */
-export type TypefestConfigName = InternalTypefestConfigName;
+/** Canonical flat-config preset keys exposed through `plugin.configs`. */
+export type TestSignalConfigName = InternalTestSignalConfigName;
 
-/**
- * Flat-config preset shape produced by this plugin.
- *
- * @remarks
- * The `rules` map is required so preset composition can always merge concrete
- * rule severity entries without additional null checks.
- */
-export type TypefestPresetConfig = Linter.Config & {
+/** Flat-config preset shape produced by this plugin. */
+export type TestSignalPresetConfig = Linter.Config & {
     rules: NonNullable<Linter.Config["rules"]>;
 };
 
-/** Internal alias for flat config objects handled by preset builders. */
-type FlatConfig = Linter.Config;
+/** Fully-qualified ESLint rule id used by this plugin. */
+export type TestSignalRuleId = `test-signal/${TestSignalRuleName}`;
 
-/** Normalized language-options shape for preset composition helpers. */
-type FlatLanguageOptions = NonNullable<FlatConfig["languageOptions"]>;
+/** Unqualified rule name supported by `eslint-plugin-test-signal`. */
+export type TestSignalRuleName = keyof typeof testSignalRules;
 
-/** Normalized parser-options shape for preset composition helpers. */
+type FlatLanguageOptions = NonNullable<Linter.Config["languageOptions"]>;
 type FlatParserOptions = NonNullable<FlatLanguageOptions["parserOptions"]>;
-
-/** Rule-map type used by preset rule-list expansion helpers. */
-type RulesConfig = TypefestPresetConfig["rules"];
-
-/** Contract for the `configs` object exported by this plugin. */
-type TypefestConfigsContract = Record<TypefestConfigName, TypefestPresetConfig>;
-
-/** Fully assembled plugin contract used by the runtime default export. */
-type TypefestPluginContract = Except<ESLint.Plugin, "configs" | "rules"> & {
-    configs: TypefestConfigsContract;
+type RulesConfig = TestSignalPresetConfig["rules"];
+type TestSignalConfigsContract = Record<
+    InternalTestSignalConfigName,
+    TestSignalPresetConfig
+>;
+type TestSignalPluginContract = Omit<ESLint.Plugin, "configs" | "rules"> & {
+    configs: TestSignalConfigsContract;
     meta: {
         name: string;
         namespace: string;
@@ -81,38 +62,30 @@ type TypefestPluginContract = Except<ESLint.Plugin, "configs" | "rules"> & {
     rules: NonNullable<ESLint.Plugin["rules"]>;
 };
 
+const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
+    typeof value === "object" && value !== null;
+
 /**
  * Resolve package version from package.json data.
- *
- * @param pkg - Parsed package metadata value.
- *
- * @returns The package version, or `0.0.0` when unavailable.
  */
 function getPackageVersion(pkg: unknown): string {
-    if (typeof pkg !== "object" || pkg === null) {
+    if (!isRecord(pkg)) {
         return "0.0.0";
     }
 
-    const version: unknown = Reflect.get(pkg, "version");
+    const version = pkg["version"];
 
     return typeof version === "string" ? version : "0.0.0";
 }
 
-/** Package metadata used to populate plugin runtime `meta.version`. */
-const packageJsonValue = safeCastTo<unknown>(packageJson);
-
-/** Parser module reused across preset construction. */
+const packageJsonValue: unknown = packageJson;
 const typeScriptParserValue: FlatLanguageOptions["parser"] = typeScriptParser;
 
-/** Default parser options applied when a preset omits parser options. */
 const defaultParserOptions = {
     ecmaVersion: "latest",
     sourceType: "module",
 } satisfies FlatParserOptions;
 
-/**
- * Normalize unknown parser options into a mutable parser-options object.
- */
 const normalizeParserOptions = (
     parserOptions: FlatLanguageOptions["parserOptions"]
 ): FlatParserOptions =>
@@ -122,58 +95,12 @@ const normalizeParserOptions = (
         ? { ...parserOptions }
         : { ...defaultParserOptions };
 
-/**
- * Fully-qualified ESLint rule id used by this plugin.
- *
- * @remarks
- * Consumers typically use this when building strongly typed rule maps or helper
- * utilities that require namespaced rule identifiers.
- */
-export type TypefestRuleId = `typefest/${TypefestRuleName}`;
+const testSignalEslintRules =
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- typescript-eslint rule modules are runtime-compatible with ESLint's plugin rule map, but the package types model different context shapes.
+    testSignalRules as unknown as NonNullable<ESLint.Plugin["rules"]>;
 
-/** Unqualified rule name supported by `eslint-plugin-typefest`. */
-export type TypefestRuleName = keyof typeof typefestRules;
-
-/**
- * ESLint-compatible rule map view of the strongly typed internal rule record.
- */
-const typefestEslintRules: NonNullable<ESLint.Plugin["rules"]> &
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- ESLint's public RuleDefinition type requires mutable defaultOptions, while the plugin's internal rule registry intentionally stores readonly rule metadata.
-    typeof typefestRules = typefestRules as NonNullable<
-    ESLint.Plugin["rules"]
-> &
-    typeof typefestRules;
-
-const isTypefestRuleName = (value: string): value is TypefestRuleName =>
-    objectHasIn(typefestRules, value);
-
-const typefestRuleEntries: readonly (readonly [
-    TypefestRuleName,
-    (typeof typefestRules)[TypefestRuleName],
-])[] = (() => {
-    const entries: (readonly [
-        TypefestRuleName,
-        (typeof typefestRules)[TypefestRuleName],
-    ])[] = [];
-
-    for (const [ruleName] of objectEntries(typefestRules)) {
-        if (!isTypefestRuleName(ruleName)) {
-            continue;
-        }
-
-        const ruleDefinition = typefestRules[ruleName];
-
-        if (ruleDefinition === undefined) {
-            continue;
-        }
-
-        entries.push([ruleName, ruleDefinition]);
-    }
-
-    return entries;
-})();
-
-const ruleDocsMetadataByRuleName = deriveRuleDocsMetadataByName(typefestRules);
+const ruleDocsMetadataByRuleName =
+    deriveRuleDocsMetadataByName(testSignalRules);
 const rulePresetMembership = deriveRulePresetMembershipByRuleName(
     ruleDocsMetadataByRuleName
 );
@@ -181,33 +108,33 @@ const typeCheckedRuleNames = deriveTypeCheckedRuleNameSet(
     ruleDocsMetadataByRuleName
 );
 
-const createEmptyPresetRuleMap = (): Record<
-    TypefestConfigName,
-    TypefestRuleName[]
-> => ({
-    all: [],
-    experimental: [],
-    minimal: [],
-    recommended: [],
-    "recommended-type-checked": [],
-    strict: [],
-    "ts-extras/type-guards": [],
-    "type-fest/types": [],
-});
-
 const dedupeRuleNames = (
-    ruleNames: readonly TypefestRuleName[]
-): TypefestRuleName[] => [...new Set(ruleNames)];
+    ruleNames: readonly TestSignalRuleName[]
+): TestSignalRuleName[] => [...new Set(ruleNames)];
+
+const createEmptyPresetRuleMap = (): Record<
+    InternalTestSignalConfigName,
+    TestSignalRuleName[]
+> => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- The map is immediately populated for every canonical config name.
+    const presetRuleMap = {} as Record<InternalTestSignalConfigName, TestSignalRuleName[]>;
+
+    for (const configName of testSignalConfigNames) {
+        presetRuleMap[configName] = [];
+    }
+
+    return presetRuleMap;
+};
 
 const derivePresetRuleNamesByConfig = (): Readonly<
-    Record<TypefestConfigName, readonly TypefestRuleName[]>
+    Record<InternalTestSignalConfigName, readonly TestSignalRuleName[]>
 > => {
     const presetRuleNamesByConfig = createEmptyPresetRuleMap();
 
-    for (const [ruleName] of typefestRuleEntries) {
+    for (const { ruleName } of testSignalRuleCatalogEntries) {
         const configNames = rulePresetMembership[ruleName];
 
-        if (!isDefined(configNames) || isEmpty(configNames)) {
+        if (configNames.length === 0) {
             throw new TypeError(
                 `Rule '${ruleName}' is missing preset membership metadata.`
             );
@@ -218,70 +145,47 @@ const derivePresetRuleNamesByConfig = (): Readonly<
         }
     }
 
-    return {
-        all: dedupeRuleNames(presetRuleNamesByConfig.all),
-        experimental: dedupeRuleNames(presetRuleNamesByConfig.experimental),
-        minimal: dedupeRuleNames(presetRuleNamesByConfig.minimal),
-        recommended: dedupeRuleNames(presetRuleNamesByConfig.recommended),
-        "recommended-type-checked": dedupeRuleNames(
-            presetRuleNamesByConfig["recommended-type-checked"]
-        ),
-        strict: dedupeRuleNames(presetRuleNamesByConfig.strict),
-        "ts-extras/type-guards": dedupeRuleNames(
-            presetRuleNamesByConfig["ts-extras/type-guards"]
-        ),
-        "type-fest/types": dedupeRuleNames(
-            presetRuleNamesByConfig["type-fest/types"]
-        ),
-    };
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- The map is immediately populated for every canonical config name.
+    const normalizedPresetRuleNamesByConfig = {} as Record<
+        InternalTestSignalConfigName,
+        readonly TestSignalRuleName[]
+    >;
+
+    for (const configName of testSignalConfigNames) {
+        normalizedPresetRuleNamesByConfig[configName] = dedupeRuleNames(
+            presetRuleNamesByConfig[configName]
+        );
+    }
+
+    return normalizedPresetRuleNamesByConfig;
 };
 
-/**
- * Build an ESLint rules map that enables each provided rule at error level.
- *
- * @param ruleNames - Rule names to enable.
- *
- * @returns Rules config object compatible with flat config.
- */
-function errorRulesFor(ruleNames: readonly TypefestRuleName[]): RulesConfig {
+function errorRulesFor(ruleNames: readonly TestSignalRuleName[]): RulesConfig {
     const rules: RulesConfig = {};
 
     for (const ruleName of ruleNames) {
-        rules[`typefest/${ruleName}`] = ERROR_SEVERITY;
+        rules[`test-signal/${ruleName}`] = ERROR_SEVERITY;
     }
 
     return rules;
 }
 
-/**
- * Remove duplicates while preserving first-seen ordering.
- *
- * @param ruleNames - Candidate rule list.
- *
- * @returns Deduplicated rule list.
- */
 const presetRuleNamesByConfig = derivePresetRuleNamesByConfig();
-
-/** Recommended preset rule list for zero-type-info usage. */
-const recommendedRuleNames: TypefestRuleName[] = [];
+const recommendedRuleNames: TestSignalRuleName[] = [];
 
 for (const ruleName of presetRuleNamesByConfig.recommended) {
-    if (setHas(typeCheckedRuleNames, ruleName)) {
-        continue;
+    if (!typeCheckedRuleNames.has(ruleName)) {
+        recommendedRuleNames.push(ruleName);
     }
-
-    recommendedRuleNames.push(ruleName);
 }
 
-/** Type-aware recommended preset rule list. */
 const recommendedTypeCheckedRuleNames = dedupeRuleNames([
     ...recommendedRuleNames,
     ...presetRuleNamesByConfig["recommended-type-checked"],
 ]);
 
-/** Effective per-preset rule lists after applying derived policy overlays. */
 const effectivePresetRuleNamesByConfig: Readonly<
-    Record<TypefestConfigName, readonly TypefestRuleName[]>
+    Record<InternalTestSignalConfigName, readonly TestSignalRuleName[]>
 > = {
     ...presetRuleNamesByConfig,
     experimental: dedupeRuleNames([
@@ -292,27 +196,18 @@ const effectivePresetRuleNamesByConfig: Readonly<
     "recommended-type-checked": recommendedTypeCheckedRuleNames,
 };
 
-/**
- * Apply parser and plugin metadata required by all plugin presets.
- *
- * @param config - Preset-specific config fragment.
- * @param plugin - Plugin object registered under the `typefest` namespace.
- * @param options - Preset-level wiring options.
- *
- * @returns Normalized preset config.
- */
-function withTypefestPlugin(
-    config: Readonly<TypefestPresetConfig>,
+function withTestSignalPlugin(
+    config: Readonly<TestSignalPresetConfig>,
     plugin: Readonly<ESLint.Plugin>,
     options: Readonly<{ requiresTypeChecking: boolean }>
-): TypefestPresetConfig {
+): TestSignalPresetConfig {
     const existingLanguageOptions = config.languageOptions ?? {};
     const existingParserOptions = existingLanguageOptions["parserOptions"];
     const parserOptions = normalizeParserOptions(existingParserOptions);
 
     if (
         options.requiresTypeChecking &&
-        !objectHasIn(parserOptions, "projectService")
+        !Object.hasOwn(parserOptions, "projectService")
     ) {
         Reflect.set(parserOptions, "projectService", true);
     }
@@ -325,26 +220,25 @@ function withTypefestPlugin(
 
     return {
         ...config,
-        files: config.files ?? [...TYPE_SCRIPT_FILES],
+        files: config.files ?? [...TYPE_SCRIPT_TEST_FILES],
         languageOptions,
         plugins: {
             ...config.plugins,
-            typefest: plugin,
+            "test-signal": plugin,
         },
     };
 }
 
-/** Minimal plugin object used when assembling flat-config presets. */
 const pluginForConfigs: ESLint.Plugin = {
-    rules: typefestEslintRules,
+    rules: testSignalEslintRules,
 };
 
 const createPresetConfig = (
-    configName: TypefestConfigName
-): TypefestPresetConfig => {
-    const configMetadata = typefestConfigMetadataByName[configName];
+    configName: InternalTestSignalConfigName
+): TestSignalPresetConfig => {
+    const configMetadata = testSignalConfigMetadataByName[configName];
 
-    return withTypefestPlugin(
+    return withTestSignalPlugin(
         {
             name: configMetadata.presetName,
             rules: errorRulesFor(effectivePresetRuleNamesByConfig[configName]),
@@ -356,58 +250,36 @@ const createPresetConfig = (
     );
 };
 
-/**
- * Flat config presets distributed by eslint-plugin-typefest.
- */
-const createTypefestConfigsDefinition = (): TypefestConfigsContract => ({
+const createTestSignalConfigsDefinition = (): TestSignalConfigsContract => ({
     all: createPresetConfig("all"),
     experimental: createPresetConfig("experimental"),
     minimal: createPresetConfig("minimal"),
     recommended: createPresetConfig("recommended"),
     "recommended-type-checked": createPresetConfig("recommended-type-checked"),
     strict: createPresetConfig("strict"),
-    "ts-extras/type-guards": createPresetConfig("ts-extras/type-guards"),
-    "type-fest/types": createPresetConfig("type-fest/types"),
 });
 
-const typefestConfigsDefinition = createTypefestConfigsDefinition();
+const testSignalConfigs: TestSignalConfigsContract =
+    createTestSignalConfigsDefinition();
 
-/** Finalized typed view of all exported preset configurations. */
-const typefestConfigs: TypefestConfigsContract = typefestConfigsDefinition;
-
-/**
- * Runtime type for the plugin's generated config presets.
- *
- * @remarks
- * Mirrors `plugin.configs` and is useful when composing typed preset-aware
- * tooling in external integrations.
- */
-export type TypefestConfigs = typeof typefestConfigs;
+/** Runtime type for the plugin's generated config presets. */
+export type TestSignalConfigs = typeof testSignalConfigs;
 
 /**
  * Main plugin object exported for ESLint consumption.
  */
-const typefestPlugin: TypefestPluginContract = {
-    configs: typefestConfigs,
+const testSignalPlugin: TestSignalPluginContract = {
+    configs: testSignalConfigs,
     meta: {
-        name: "eslint-plugin-typefest",
-        namespace: "typefest",
+        name: "eslint-plugin-test-signal",
+        namespace: "test-signal",
         version: getPackageVersion(packageJsonValue),
     },
     processors: {},
-    rules: typefestEslintRules,
+    rules: testSignalEslintRules,
 };
 
-/**
- * Runtime type for the plugin object exported as default.
- *
- * @remarks
- * Includes resolved `meta`, `rules`, and `configs` contracts after plugin
- * assembly.
- */
-export type TypefestPlugin = typeof typefestPlugin;
+/** Runtime type for the plugin object exported as default. */
+export type TestSignalPlugin = typeof testSignalPlugin;
 
-/**
- * Default plugin export consumed by ESLint flat config.
- */
-export default typefestPlugin;
+export default testSignalPlugin;

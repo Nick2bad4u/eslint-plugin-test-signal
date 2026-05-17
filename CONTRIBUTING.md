@@ -1,9 +1,9 @@
-# Contributing to eslint-plugin-typefest
+# Contributing to eslint-plugin-test-signal
 
 Thanks for your interest in contributing.
 
-This repository contains an ESLint plugin focused on `type-fest` and
-`ts-extras` usage patterns for TypeScript codebases.
+This repository contains an ESLint plugin focused on weak test-signal patterns
+in JavaScript and TypeScript test suites.
 
 ## Prerequisites
 
@@ -60,7 +60,7 @@ When adding script output, prefer this severity split:
 ```text
 .
 ├── src/                  # Plugin source and rule implementations
-├── test/                 # Rule tests and test helpers
+├── test/                 # Rule tests and shared test utilities
 ├── docs/                 # Rule docs and Docusaurus docs app
 ├── scripts/              # Repository scripts
 ├── .github/              # Workflows and automation configs
@@ -96,20 +96,15 @@ Avoid snapshots for:
 Focused update flow:
 
 ```bash
-npx vitest run test/plugin-contract-snapshots.test.ts -u
-npx vitest run test/rule-metadata-snapshots.test.ts -u
 npm run sync:readme-rules-table:update
-npx vitest run test/docs-heading-snapshots.test.ts -u
+npm run sync:rules:write
 ```
 
 Verification flow:
 
 ```bash
-npx vitest run test/plugin-contract-snapshots.test.ts test/rule-metadata-snapshots.test.ts test/readme-rules-table-sync.test.ts test/docs-heading-snapshots.test.ts
+npx vitest run test/readme-rules-table-sync.test.ts test/presets-rules-matrix-sync.test.ts test/docs-integrity.test.ts
 ```
-
-For detailed design and review guidance, see
-[`docs/rules/guides/snapshot-testing.md`](./docs/rules/guides/snapshot-testing.md).
 
 Optional focused checks:
 
@@ -127,8 +122,8 @@ Format:
 
 Examples:
 
-- `:sparkles: feat(rule): add prefer-type-fest-xyz`
-- `:bug: fix(rule): avoid false positive in union type handling`
+- `:sparkles: feat(rule): add no-xyz`
+- `:bug: fix(rule): avoid false positive in nested test bodies`
 - `:memo: docs: clarify configuration for type-aware rules`
 
 ## Pull request expectations

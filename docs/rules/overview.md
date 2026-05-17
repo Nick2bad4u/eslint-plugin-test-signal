@@ -1,50 +1,40 @@
----
-title: Overview
-description: README-style overview for eslint-plugin-typefest.
----
+# eslint-plugin-test-signal
 
-# eslint-plugin-typefest
+`eslint-plugin-test-signal` reports tests that look green while proving too
+little about behavior.
 
-ESLint plugin for teams that want consistent TypeScript-first conventions based on:
+The first rule set focuses on common weak-test signals:
 
-- [`type-fest`](https://github.com/sindresorhus/type-fest)
-- [`ts-extras`](https://github.com/sindresorhus/ts-extras)
+- tests whose only assertion is a snapshot;
+- tests whose only assertion inspects mock call metadata;
+- Promise assertions that are not awaited or returned;
+- async tests that contain no assertion;
+- suites that have no negative-path coverage signal.
 
-The plugin ships focused rule sets for modern Flat Config usage, with parser setup included in each preset.
+## Design scope
 
-## Installation
-
-```bash
-npm install --save-dev eslint-plugin-typefest typescript
-```
-
-> `@typescript-eslint/parser` is loaded automatically by plugin presets.
-
-## Quick start (Flat Config)
-
-```ts
-import typefest from "eslint-plugin-typefest";
-
-export default [typefest.configs.recommended];
-```
-
-That is enough for TypeScript files (`**/*.{ts,tsx,mts,cts}`).
+The plugin uses syntax-level heuristics that work across Vitest, Jest-style
+APIs, and `@typescript-eslint/rule-tester` suites. It intentionally avoids type
+checker work because the targeted patterns are visible directly in the test AST.
 
 ## Presets
 
-| Preset                                            | Preset page                                                         |
-| ------------------------------------------------- | ------------------------------------------------------------------- |
-| 🟢 `typefest.configs.minimal`                     | [Minimal](./presets/minimal.md)                                     |
-| 🟡 `typefest.configs.recommended`                 | [Recommended](./presets/recommended.md)                             |
-| 🟠 `typefest.configs["recommended-type-checked"]` | [Recommended (type-checked)](./presets/recommended-type-checked.md) |
-| 🔴 `typefest.configs.strict`                      | [Strict](./presets/strict.md)                                       |
-| 🟣 `typefest.configs.all`                         | [All](./presets/all.md)                                             |
-| 🧪 `typefest.configs.experimental`                | [Experimental](./presets/experimental.md)                           |
-| 💠 `typefest.configs["type-fest/types"]`          | [type-fest/types](./presets/type-fest-types.md)                     |
-| ✴️ `typefest.configs["ts-extras/type-guards"]`    | [ts-extras/type-guards](./presets/ts-extras-type-guards.md)         |
+- `testSignal.configs.minimal` enables the lowest-noise correctness rules.
+- `testSignal.configs.recommended` adds snapshot-only and mock-call-only test
+  detection.
+- `testSignal.configs["recommended-type-checked"]` currently matches
+  `recommended` because no shipped rule requires parser services yet.
+- `testSignal.configs.strict` adds negative-path coverage enforcement.
+- `testSignal.configs.all` enables every stable rule.
+- `testSignal.configs.experimental` is reserved for future candidate rules and
+  currently matches `all`.
 
-## Next steps
+## Rule reference
 
-- Open **Getting Started** in this sidebar.
-- Browse [**Presets**](./presets/index.md) for preset-by-preset guidance.
-- Use **Rules** to review every rule with examples.
+| Rule | Purpose |
+| --- | --- |
+| [`no-empty-async-tests`](./no-empty-async-tests.md) | Flags async tests without assertions. |
+| [`require-awaited-async-assertions`](./require-awaited-async-assertions.md) | Flags floating `.resolves` and `.rejects` assertions. |
+| [`no-snapshot-only-tests`](./no-snapshot-only-tests.md) | Flags tests whose only assertions are snapshots. |
+| [`no-mock-call-only-tests`](./no-mock-call-only-tests.md) | Flags tests whose only assertions inspect mock calls. |
+| [`require-negative-path`](./require-negative-path.md) | Flags test scopes without negative-path coverage signals. |

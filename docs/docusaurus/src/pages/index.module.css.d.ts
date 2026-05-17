@@ -20,8 +20,8 @@ declare const styles: {
     readonly heroContent: string;
     readonly heroGrid: string;
     readonly heroInlineLink: string;
-    readonly heroInlineLinkTsExtras: string;
-    readonly heroInlineLinkTypeFest: string;
+    readonly heroInlineLinkNegative: string;
+    readonly heroInlineLinkSnapshot: string;
     readonly heroKicker: string;
     readonly heroLiveBadges: string;
     readonly heroPanel: string;

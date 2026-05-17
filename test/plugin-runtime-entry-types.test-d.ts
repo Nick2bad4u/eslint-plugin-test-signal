@@ -4,12 +4,12 @@
  */
 import type { ESLint } from "eslint";
 
-import typefestPlugin from "eslint-plugin-typefest";
+import testSignalPlugin from "eslint-plugin-test-signal";
 import { assertType } from "vitest";
 
-assertType<ESLint.Plugin>(typefestPlugin);
+assertType<ESLint.Plugin>(testSignalPlugin);
 
-assertType<ESLint.Plugin["configs"] | undefined>(typefestPlugin.configs);
-assertType<string | undefined>(typefestPlugin.meta?.name);
-assertType<string | undefined>(typefestPlugin.meta?.version);
-assertType<ESLint.Plugin["rules"] | undefined>(typefestPlugin.rules);
+assertType<ESLint.Plugin["configs"] | undefined>(testSignalPlugin.configs);
+assertType<string | undefined>(testSignalPlugin.meta?.name);
+assertType<string | undefined>(testSignalPlugin.meta?.version);
+assertType<ESLint.Plugin["rules"] | undefined>(testSignalPlugin.rules);

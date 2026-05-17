@@ -1,16 +1,14 @@
 /**
  * @packageDocumentation
- * Vitest coverage for `configs.test` behavior.
+ * Vitest coverage for plugin preset wiring.
  */
-import type { UnknownRecord } from "type-fest";
-
 import { describe, expect, it } from "vitest";
 
 import {
-    typefestConfigMetadataByName,
-    typefestConfigNames,
-} from "../src/_internal/typefest-config-references";
-import typefestPlugin from "../src/plugin";
+    testSignalConfigMetadataByName,
+    testSignalConfigNames,
+} from "../src/_internal/test-signal-config-references";
+import testSignalPlugin from "../src/plugin";
 
 interface FlatConfigLike {
     files?: unknown;
@@ -23,151 +21,48 @@ interface FlatConfigLike {
     rules?: UnknownRecord;
 }
 
-/**
- * Resolve a named plugin preset config from a dynamic `plugin.configs` map.
- *
- * @param configs - Dynamic plugin configs record.
- * @param configName - Preset key to resolve.
- *
- * @returns Parsed flat-config-like preset when present and object-shaped.
- */
-function getConfig(
-    configs: Readonly<null | UnknownRecord>,
-    configName: string
-): FlatConfigLike | undefined {
-    const config = configs?.[configName];
+type UnknownRecord = Record<string, unknown>;
+
+const isObject = (value: unknown): value is UnknownRecord =>
+    typeof value === "object" && value !== null;
+
+const getConfig = (configName: string): FlatConfigLike | undefined => {
+    const config = (testSignalPlugin.configs as UnknownRecord)[configName];
 
     return isObject(config) ? config : undefined;
-}
+};
 
-/**
- * Resolve the `rules` object for a named plugin preset.
- *
- * @param configs - Dynamic plugin configs record.
- * @param configName - Preset key to resolve.
- *
- * @returns Rules map when present and object-shaped; otherwise `null`.
- */
-function getConfigRules(
-    configs: Readonly<null | UnknownRecord>,
-    configName: string
-): null | UnknownRecord {
-    const config = configs?.[configName];
-    if (!isObject(config)) {
-        return null;
-    }
+const getConfigRules = (configName: string): UnknownRecord => {
+    const config = getConfig(configName);
+    const rules = config?.rules;
 
-    const rules = config["rules"];
-    if (!isObject(rules)) {
-        return null;
-    }
+    return isObject(rules) ? rules : {};
+};
 
-    return rules;
-}
-
-/**
- * Extract the `configs` export from a dynamic plugin value.
- *
- * @param pluginValue - Dynamic plugin module value.
- *
- * @returns Config map when available; otherwise `null`.
- */
-function getPluginConfigs(pluginValue: unknown): null | UnknownRecord {
-    if (!isObject(pluginValue)) {
-        return null;
-    }
-
-    const configs = pluginValue["configs"];
-    if (!isObject(configs)) {
-        return null;
-    }
-
-    return configs;
-}
-
-/**
- * Extract the `rules` export from a dynamic plugin value.
- *
- * @param pluginValue - Dynamic plugin module value.
- *
- * @returns Rules map when available; otherwise `null`.
- */
-function getPluginRules(pluginValue: unknown): null | UnknownRecord {
-    if (!isObject(pluginValue)) {
-        return null;
-    }
-
-    const rules = pluginValue["rules"];
-    if (!isObject(rules)) {
-        return null;
-    }
-
-    return rules;
-}
-
-/**
- * Check whether a dynamic value is an object-like record.
- *
- * @param value - Runtime value under inspection.
- *
- * @returns `true` when value is object-like and non-null.
- */
-function isObject(value: unknown): value is UnknownRecord {
-    return typeof value === "object" && value !== null;
-}
-
-describe("typefest plugin configs", () => {
-    const configs = getPluginConfigs(typefestPlugin);
-    const rules = getPluginRules(typefestPlugin);
-
+describe("test-signal plugin configs", () => {
     it("exports exactly the supported config keys", () => {
         expect.hasAssertions();
 
-        const keys = Object.keys(configs ?? {});
+        const keys = Object.keys(testSignalPlugin.configs);
 
-        expect(keys).toHaveLength(typefestConfigNames.length);
-        expect(new Set(keys)).toStrictEqual(new Set(typefestConfigNames));
+        expect(keys).toHaveLength(testSignalConfigNames.length);
+        expect(new Set(keys)).toStrictEqual(new Set(testSignalConfigNames));
     });
 
-    it("keeps languageOptions objects isolated per preset", () => {
+    it("registers plugin, parser defaults, and test file globs", () => {
         expect.hasAssertions();
 
-        const recommendedConfig = getConfig(configs, "recommended");
-        const strictConfig = getConfig(configs, "strict");
-        const allConfig = getConfig(configs, "all");
-
-        expect(recommendedConfig).toBeDefined();
-        expect(strictConfig).toBeDefined();
-        expect(allConfig).toBeDefined();
-
-        const recommendedPresetConfig = recommendedConfig!;
-        const strictPresetConfig = strictConfig!;
-        const allPresetConfig = allConfig!;
-
-        expect(recommendedPresetConfig.languageOptions).not.toBe(
-            strictPresetConfig.languageOptions
-        );
-        expect(recommendedPresetConfig.languageOptions).not.toBe(
-            allPresetConfig.languageOptions
-        );
-
-        expect(recommendedPresetConfig.languageOptions?.parserOptions).not.toBe(
-            strictPresetConfig.languageOptions?.parserOptions
-        );
-        expect(strictPresetConfig.languageOptions?.parserOptions).not.toBe(
-            allPresetConfig.languageOptions?.parserOptions
-        );
-    });
-
-    it("every exported config registers plugin and TypeScript parser defaults", () => {
-        expect.hasAssertions();
-
-        for (const config of Object.values(configs ?? {}) as FlatConfigLike[]) {
+        for (const config of Object.values(
+            testSignalPlugin.configs
+        ) as FlatConfigLike[]) {
             expect(config).toStrictEqual(
                 expect.objectContaining({
-                    files: ["**/*.{ts,tsx,mts,cts}"],
+                    files: [
+                        "**/*.{test,spec}.{js,jsx,ts,tsx,mjs,cjs,mts,cts}",
+                        "**/__tests__/**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}",
+                    ],
                     plugins: expect.objectContaining({
-                        typefest: expect.anything(),
+                        "test-signal": expect.anything(),
                     }),
                 })
             );
@@ -184,44 +79,20 @@ describe("typefest plugin configs", () => {
         }
     });
 
-    it("enables every rule in the experimental preset", () => {
+    it("keeps minimal within recommended within strict within all within experimental", () => {
         expect.hasAssertions();
 
-        const experimentalRules = getConfigRules(configs, "experimental");
-
-        expect(experimentalRules).toBeDefined();
-
-        for (const ruleId of Object.keys(rules ?? {})) {
-            expect(experimentalRules).toHaveProperty(
-                `typefest/${ruleId}`,
-                "error"
-            );
-        }
-    });
-
-    it("keeps minimal ⊂ recommended ⊂ recommended-type-checked ⊂ strict ⊂ all ⊂ experimental", () => {
-        expect.hasAssertions();
-
-        const minimalRules = getConfigRules(configs, "minimal") ?? {};
-        const recommendedRules = getConfigRules(configs, "recommended") ?? {};
-        const recommendedTypeCheckedRules =
-            getConfigRules(configs, "recommended-type-checked") ?? {};
-        const strictRules = getConfigRules(configs, "strict") ?? {};
-        const allRules = getConfigRules(configs, "all") ?? {};
-        const experimentalRules = getConfigRules(configs, "experimental") ?? {};
+        const minimalRules = getConfigRules("minimal");
+        const recommendedRules = getConfigRules("recommended");
+        const strictRules = getConfigRules("strict");
+        const allRules = getConfigRules("all");
+        const experimentalRules = getConfigRules("experimental");
 
         for (const ruleName of Object.keys(minimalRules)) {
             expect(recommendedRules).toHaveProperty(ruleName, "error");
         }
 
         for (const ruleName of Object.keys(recommendedRules)) {
-            expect(recommendedTypeCheckedRules).toHaveProperty(
-                ruleName,
-                "error"
-            );
-        }
-
-        for (const ruleName of Object.keys(recommendedTypeCheckedRules)) {
             expect(strictRules).toHaveProperty(ruleName, "error");
         }
 
@@ -234,80 +105,50 @@ describe("typefest plugin configs", () => {
         }
     });
 
-    it("keeps type-fest/types focused to type-fest rules", () => {
+    it("enables the intended rule sets", () => {
         expect.hasAssertions();
 
-        const festTypeRulesPreset =
-            getConfigRules(configs, "type-fest/types") ?? {};
-
-        for (const ruleName of Object.keys(festTypeRulesPreset)) {
-            expect(
-                ruleName.startsWith("typefest/prefer-type-fest-")
-            ).toBeTruthy();
-        }
+        expect(getConfigRules("minimal")).toStrictEqual({
+            "test-signal/no-empty-async-tests": "error",
+            "test-signal/no-focused-tests": "error",
+            "test-signal/require-awaited-async-assertions": "error",
+        });
+        expect(getConfigRules("recommended")).toStrictEqual(
+            expect.objectContaining({
+                "test-signal/no-conditional-assertions": "error",
+                "test-signal/no-disabled-tests": "error",
+                "test-signal/no-mock-call-only-tests": "error",
+                "test-signal/no-snapshot-only-tests": "error",
+                "test-signal/no-weak-truthy-assertions": "error",
+                "test-signal/require-assertions": "error",
+            })
+        );
+        expect(getConfigRules("strict")).toHaveProperty(
+            "test-signal/require-negative-path",
+            "error"
+        );
+        expect(getConfigRules("strict")).toHaveProperty(
+            "test-signal/no-try-catch-assertions",
+            "error"
+        );
+        expect(getConfigRules("strict")).toHaveProperty(
+            "test-signal/require-error-message-assertions",
+            "error"
+        );
     });
 
-    it("keeps ts-extras/type-guards focused to ts-extras rules", () => {
+    it("keeps parser projectService aligned with preset metadata", () => {
         expect.hasAssertions();
 
-        const tsExtrasRules =
-            getConfigRules(configs, "ts-extras/type-guards") ?? {};
-
-        for (const ruleName of Object.keys(tsExtrasRules)) {
-            expect(
-                ruleName.startsWith("typefest/prefer-ts-extras-")
-            ).toBeTruthy();
-        }
-    });
-
-    it("keeps all-only rules excluded from strict and included in all", () => {
-        expect.hasAssertions();
-
-        const strictRules = getConfigRules(configs, "strict") ?? {};
-        const allRules = getConfigRules(configs, "all") ?? {};
-
-        const allOnlyRules = ["typefest/prefer-ts-extras-is-equal-type"];
-
-        for (const ruleName of allOnlyRules) {
-            expect(strictRules).not.toHaveProperty(ruleName);
-            expect(allRules).toHaveProperty(ruleName, "error");
-        }
-    });
-
-    it("keeps experimental-only rules excluded from all and included in experimental", () => {
-        expect.hasAssertions();
-
-        const allRules = getConfigRules(configs, "all") ?? {};
-        const experimentalRules = getConfigRules(configs, "experimental") ?? {};
-
-        const experimentalOnlyRules = [
-            "typefest/prefer-ts-extras-object-map-values",
-            "typefest/prefer-type-fest-conditional-except",
-            "typefest/prefer-type-fest-merge",
-            "typefest/prefer-type-fest-stringified",
-        ];
-
-        for (const ruleName of experimentalOnlyRules) {
-            expect(allRules).not.toHaveProperty(ruleName);
-            expect(experimentalRules).toHaveProperty(ruleName, "error");
-        }
-    });
-
-    it("enables parser projectService for presets that include typed rules", () => {
-        expect.hasAssertions();
-
-        for (const configName of typefestConfigNames) {
-            const config = getConfig(configs, configName);
-
-            expect(config).toBeDefined();
-
+        for (const configName of testSignalConfigNames) {
+            const config = getConfig(configName);
             const parserOptions = config?.languageOptions?.parserOptions;
             const hasProjectServiceEnabled =
                 isObject(parserOptions) &&
                 parserOptions["projectService"] === true;
 
             expect(hasProjectServiceEnabled).toBe(
-                typefestConfigMetadataByName[configName].requiresTypeChecking
+                testSignalConfigMetadataByName[configName].requiresTypeChecking
             );
         }
     });

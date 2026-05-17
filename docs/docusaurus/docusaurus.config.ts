@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 /** Route base path where docs site is deployed (GitHub Pages project path). */
 const baseUrl =
-    process.env["DOCUSAURUS_BASE_URL"] ?? "/eslint-plugin-typefest/";
+    process.env["DOCUSAURUS_BASE_URL"] ?? "/eslint-plugin-test-signal/";
 /** Opt-in flag for experimental Docusaurus performance features. */
 const enableExperimentalFaster =
     process.env["DOCUSAURUS_ENABLE_EXPERIMENTAL"] === "true";
@@ -16,21 +16,21 @@ const enableExperimentalFaster =
 /** GitHub organization used for edit links and project metadata. */
 const organizationName = "Nick2bad4u";
 /** Repository name used for edit links and project metadata. */
-const projectName = "eslint-plugin-typefest";
+const projectName = "eslint-plugin-test-signal";
 /** Public origin for the published documentation site. */
 const siteOrigin = "https://nick2bad4u.github.io";
 /** Canonical public site URL including the GitHub Pages project path. */
 const siteUrl = `${siteOrigin}${baseUrl}`;
 /** Global site description used for SEO and social cards. */
 const siteDescription =
-    "Type-safe ESLint rules for adopting type-fest and ts-extras patterns in modern TypeScript codebases.";
+    "ESLint rules that flag weak tests before they become false confidence.";
 /** Global blog description used for SEO and social cards. */
 const projectBlogDescription = `Updates, architecture notes, and practical guidance for ${projectName} users.`;
 /** Global project tagline used for SEO metadata. */
-const projectTagline = `Type-safe ESLint rules for adopting type-fest and ts-extras patterns in modern TypeScript codebases.`;
+const projectTagline = `ESLint rules that flag weak tests before they become false confidence.`;
 /** Global project keywords used for SEO metadata. */
 const projectKeywords =
-    "eslint, eslint-plugin, type-fest, ts-extras, typescript, flat config, static analysis";
+    "eslint, eslint-plugin, testing, test quality, vitest, jest, typescript, flat config, static analysis";
 /** Social preview image used for Open Graph and Twitter cards. */
 const socialCardImagePath = "img/logo.png";
 /** Absolute social preview image URL. */
@@ -477,12 +477,12 @@ const config = {
                             label: "\ue7d2 ESLint Inspector",
                         },
                         {
-                            href: `https://www.npmjs.com/package/ts-extras`,
-                            label: "\uf113 ts-extras",
+                            href: `https://github.com/${organizationName}/${projectName}/actions`,
+                            label: "\ueab2 Actions",
                         },
                         {
-                            href: `https://www.npmjs.com/package/type-fest`,
-                            label: "\ue65b type-fest",
+                            href: `https://www.npmjs.com/package/${projectName}`,
+                            label: "\ue616 NPM Package",
                         },
                     ],
                     title: "📁 Project",
@@ -494,8 +494,8 @@ const config = {
                             label: "\uea84 GitHub Repository",
                         },
                         {
-                            href: `https://nick2bad4u.github.io/${projectName}/stylelint-inspector/`,
-                            label: "\ue7d2 Stylelint Inspector",
+                            href: `https://github.com/${organizationName}/${projectName}/discussions`,
+                            label: "\ueb05 Discussions",
                         },
                         {
                             href: `https://github.com/${organizationName}/${projectName}/issues`,
@@ -540,7 +540,7 @@ const config = {
                         },
                         {
                             label: "• Adoption & Rollout",
-                            to: "/docs/rules/category/-adoption--rollout",
+                            to: "/docs/rules/guides/adoption-checklist",
                         },
                     ],
                 },
@@ -556,12 +556,8 @@ const config = {
                             to: "/docs/rules",
                         },
                         {
-                            label: "💠 Rules for ts-extras",
-                            to: "/docs/rules/category/ts-extras",
-                        },
-                        {
-                            label: "✴️ Rules for type-fest",
-                            to: "/docs/rules/category/type-fest",
+                            label: "• Weak test signals",
+                            to: "/docs/rules/no-empty-async-tests",
                         },
                     ],
                 },
@@ -597,12 +593,8 @@ const config = {
                             to: "/docs/rules/presets/experimental",
                         },
                         {
-                            label: "💠 type-fest",
-                            to: "/docs/rules/presets/type-fest-types",
-                        },
-                        {
-                            label: "✴️ ts-extras",
-                            to: "/docs/rules/presets/ts-extras-type-guards",
+                            label: "🟠 Type Checked",
+                            to: "/docs/rules/presets/recommended-type-checked",
                         },
                     ],
                 },
@@ -621,22 +613,9 @@ const config = {
                             label: "• \ue616 NPM",
                         },
                         {
-                            href: `https://github.com/sindresorhus/type-fest`,
+                            href: `https://github.com/${organizationName}/${projectName}/issues`,
                             className: "navbar-dropdown-divider-before",
-                            label: "💠 \ue709 type-fest",
-                        },
-                        {
-                            href: `https://www.npmjs.com/package/type-fest`,
-                            label: "💠 \ue616 type-fest",
-                        },
-                        {
-                            href: `https://github.com/sindresorhus/ts-extras`,
-                            className: "navbar-dropdown-divider-before",
-                            label: "✴️ \ue709 ts-extras",
-                        },
-                        {
-                            href: `https://www.npmjs.com/package/ts-extras`,
-                            label: "✴️ \ue616 ts-extras",
+                            label: "• \uf188 Issues",
                         },
                     ],
                 },
@@ -653,38 +632,6 @@ const config = {
                         {
                             label: "• API Reference",
                             to: "/docs/developer/api",
-                        },
-                        {
-                            label: "• ADRs",
-                            to: "/docs/developer/adr",
-                        },
-                        {
-                            label: "• Types",
-                            to: "/docs/category/types",
-                        },
-                        {
-                            label: "• Charts",
-                            to: "/docs/developer/charts",
-                        },
-                        {
-                            label: "• Internals",
-                            to: "/docs/category/runtime",
-                        },
-                    ],
-                },
-                {
-                    label: "\ueaa4 Blog",
-                    position: "right",
-                    to: "/blog",
-                    type: "dropdown",
-                    items: [
-                        {
-                            label: "• Latest Posts",
-                            to: "/blog",
-                        },
-                        {
-                            label: "• All Posts",
-                            to: "/blog/archive",
                         },
                     ],
                 },

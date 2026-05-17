@@ -1,16 +1,17 @@
 /**
  * @packageDocumentation
- * Shared testing utilities for eslint-plugin-typefest RuleTester and Vitest suites.
+ * Shared testing utilities for eslint-plugin-test-signal RuleTester suites.
  */
-import type { UnknownArray, UnknownRecord } from "type-fest";
-
 import tsParser from "@typescript-eslint/parser";
 import { RuleTester } from "@typescript-eslint/rule-tester";
 import * as path from "node:path";
 import pc from "picocolors";
 import { afterAll, describe, it } from "vitest";
 
-import typefestPlugin from "../../src/plugin";
+import testSignalPlugin from "../../src/plugin";
+
+type UnknownArray = readonly unknown[];
+type UnknownRecord = Record<string, unknown>;
 
 /** Shared timeout applied to RuleTester-generated Vitest cases. */
 const ruleTesterCaseTimeoutMilliseconds = 120_000;
@@ -19,12 +20,6 @@ const ruleTesterCaseTimeoutOptions = Object.freeze({
     timeout: ruleTesterCaseTimeoutMilliseconds,
 });
 
-/**
- * Assert that a dynamic runtime value is callable for RuleTester hook wiring.
- *
- * @param candidate - Dynamic value under validation.
- * @param hookName - Human-readable hook label for diagnostics.
- */
 const assertRuleTesterHook: (
     candidate: unknown,
     hookName: string
@@ -39,32 +34,13 @@ const assertRuleTesterHook: (
     }
 };
 
-/** Callback shape used by RuleTester-generated Vitest test cases. */
 type RuleTesterCaseCallback = Parameters<typeof RuleTester.it>[1];
-
-/**
- * Vitest `it`-style hook shape that accepts per-test options.
- *
- * @remarks
- * `@typescript-eslint/rule-tester` invokes its framework adapter with two
- * arguments: the test name and its callback. That means an outer Vitest
- * describe timeout does not reliably propagate to the inner generated test
- * cases. We therefore inject the timeout at the `it(...)` boundary itself.
- */
 type TimedVitestTestHook = (
     text: string,
     options: Readonly<{ timeout: number }>,
     callback: RuleTesterCaseCallback
 ) => unknown;
 
-/**
- * Run a Vitest `it`-style hook with the repository-standard RuleTester timeout.
- *
- * @param callback - RuleTester-generated test body.
- * @param hook - Vitest test hook to execute.
- * @param hookName - Human-readable hook label for diagnostics.
- * @param text - Display name for the test case.
- */
 const runTimedRuleTesterCase = ({
     callback,
     hook,
@@ -116,27 +92,12 @@ RuleTester.itOnly = (text, callback) => {
     });
 };
 
-/** Rule module parameter type accepted by `RuleTester#run`. */
 type PluginRuleModule = Parameters<RuleTester["run"]>[1];
-/** Full argument tuple for `RuleTester#run`. */
 type RuleRunArguments = Parameters<RuleTester["run"]>;
-/** Combined valid/invalid case payload accepted by `RuleTester#run`. */
 type RuleRunCases = RuleRunArguments[2];
-/** Single invalid-case entry shape. */
 type RuleRunInvalidCase = RuleRunCases["invalid"][number];
-/** Single valid-case entry shape. */
 type RuleRunValidCase = RuleRunCases["valid"][number];
 
-/**
- * Build a deterministic fallback label for unnamed RuleTester cases.
- *
- * @param ruleName - Rule id currently under test.
- * @param caseKind - Whether the case is valid or invalid.
- * @param caseIndex - Zero-based index in the case array.
- * @param caseFilename - Optional fixture filename for display.
- *
- * @returns Styled case label shown in Vitest output.
- */
 const deriveGeneratedCaseName = (
     ruleName: string,
     caseKind: "invalid" | "valid",
@@ -158,14 +119,6 @@ const deriveGeneratedCaseName = (
     return `${caseSource}${pc.dim(" - ")}${caseLabel}`;
 };
 
-/**
- * Normalize RuleTester run cases so every case has a readable name.
- *
- * @param ruleName - Rule id currently under test.
- * @param runCases - Original valid/invalid case collections.
- *
- * @returns Case collections with generated names for unnamed entries.
- */
 const withGeneratedRuleCaseNames = (
     ruleName: string,
     runCases: Readonly<RuleRunCases>
@@ -223,13 +176,6 @@ const withGeneratedRuleCaseNames = (
     };
 };
 
-/**
- * Patch `RuleTester#run` to inject generated case names before execution.
- *
- * @param tester - RuleTester instance to patch.
- *
- * @returns Patched RuleTester instance.
- */
 const patchRuleTesterRunWithGeneratedCaseNames = (
     tester: Readonly<RuleTester>
 ): RuleTester => {
@@ -245,33 +191,13 @@ const patchRuleTesterRunWithGeneratedCaseNames = (
     return writableTester;
 };
 
-/**
- * Apply shared RuleTester run behavior: prefer explicit per-case `name`, with
- * concise fallback names when omitted.
- *
- * @param tester - RuleTester instance to patch.
- *
- * @returns Patched tester instance.
- */
 export const applySharedRuleTesterRunBehavior = (
     tester: Readonly<RuleTester>
 ): RuleTester => patchRuleTesterRunWithGeneratedCaseNames(tester);
 
-/**
- * Resolve an absolute repository path from optional relative segments.
- *
- * @param segments - Optional path segments under the repository root.
- *
- * @returns Absolute path rooted at the current workspace.
- */
 export const repoPath = (...segments: readonly string[]): string =>
     path.join(process.cwd(), ...segments);
 
-/**
- * Create a RuleTester instance configured for TypeScript parser usage.
- *
- * @returns Configured RuleTester instance.
- */
 export const createRuleTester = (): RuleTester =>
     applySharedRuleTesterRunBehavior(
         new RuleTester({
@@ -285,45 +211,24 @@ export const createRuleTester = (): RuleTester =>
         })
     );
 
-/**
- * Check whether a dynamic value is a non-null object record.
- *
- * @param value - Runtime value under inspection.
- *
- * @returns `true` when value is object-like and non-null.
- */
 const isRecord = (value: unknown): value is UnknownRecord =>
     typeof value === "object" && value !== null;
 
-/**
- * Check whether a dynamic value looks like an ESLint rule module.
- *
- * @param value - Dynamic value loaded from plugin rule map.
- *
- * @returns `true` when value has a callable `create` method.
- */
 const isRuleModule = (value: unknown): value is PluginRuleModule => {
     if (!isRecord(value)) {
         return false;
     }
 
-    const maybeCreate = (value as { create?: unknown }).create;
-
-    return typeof maybeCreate === "function";
+    return typeof value["create"] === "function";
 };
 
-/**
- * Lookup a rule module from the plugin by its unqualified rule id.
- *
- * @param ruleId - Rule id without the `typefest/` prefix.
- *
- * @returns Matching RuleTester-compatible rule module.
- */
 export const getPluginRule = (ruleId: string): PluginRuleModule => {
-    const { rules } = typefestPlugin;
-    const dynamicRules = rules as UnknownRecord;
+    const dynamicRules = testSignalPlugin.rules as UnknownRecord;
+
     if (!Object.hasOwn(dynamicRules, ruleId)) {
-        throw new Error(`Rule '${ruleId}' is not registered in typefestPlugin`);
+        throw new Error(
+            `Rule '${ruleId}' is not registered in testSignalPlugin`
+        );
     }
 
     const rule = dynamicRules[ruleId];

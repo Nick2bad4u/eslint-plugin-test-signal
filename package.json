@@ -1,25 +1,27 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
-    "name": "eslint-plugin-typefest",
+    "name": "eslint-plugin-test-signal",
     "version": "1.2.8",
     "private": false,
-    "description": "ESLint rules for adopting type-fest and ts-extras conventions.",
+    "description": "ESLint rules that flag weak tests before they become false confidence.",
     "keywords": [
         "eslint",
         "eslint-plugin",
         "eslintplugin",
-        "type-fest",
-        "ts-extras",
+        "testing",
+        "test-coverage",
+        "vitest",
+        "jest",
         "typescript"
     ],
-    "homepage": "https://nick2bad4u.github.io/eslint-plugin-typefest/",
+    "homepage": "https://nick2bad4u.github.io/eslint-plugin-test-signal/",
     "bugs": {
-        "url": "https://github.com/Nick2bad4u/eslint-plugin-typefest/issues",
+        "url": "https://github.com/Nick2bad4u/eslint-plugin-test-signal/issues",
         "email": "20943337+Nick2bad4u@users.noreply.github.com"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Nick2bad4u/eslint-plugin-typefest.git"
+        "url": "git+https://github.com/Nick2bad4u/eslint-plugin-test-signal.git"
     },
     "license": "MIT",
     "author": "Nick2bad4u <20943337+Nick2bad4u@users.noreply.github.com> (https://github.com/Nick2bad4u)",
@@ -64,7 +66,7 @@
         "prebench:eslint:stats": "npm run build",
         "bench:eslint:stats": "node benchmarks/run-eslint-stats.mjs",
         "prebench:eslint:timing": "npm run build",
-        "bench:eslint:timing": "cross-env TIMING=all eslint --config benchmarks/eslint-timing.config.mjs --stats \"test/fixtures/typed/*.invalid.ts\"",
+        "bench:eslint:timing": "cross-env TIMING=all eslint --config benchmarks/eslint-timing.config.mjs --stats \"benchmarks/fixtures/*.ts\"",
         "prebench:rule-benchmark": "npm run build",
         "bench:rule-benchmark": "eslint-rule-benchmark run",
         "prebench:ui": "npm run build",
@@ -74,9 +76,9 @@
         "build": "tsc -b tsconfig.build.json --force && npm run build:types:cjs && npm run build:cjs",
         "build:cjs": "esbuild dist/plugin.js --bundle --format=cjs --platform=node --packages=external --sourcemap --outfile=dist/plugin.cjs --footer:js=\"module.exports = module.exports.default;\"",
         "build:clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
-        "build:eslint-inspector": "npx -y @eslint/config-inspector@latest build --outDir \"docs/docusaurus/static/eslint-inspector\" --base \"/eslint-plugin-typefest/eslint-inspector/\"",
+        "build:eslint-inspector": "npx -y @eslint/config-inspector@latest build --outDir \"docs/docusaurus/static/eslint-inspector\" --base \"/eslint-plugin-test-signal/eslint-inspector/\"",
         "build:eslint-inspector:local": "npx @eslint/config-inspector",
-        "build:stylelint-inspector": "npx -y stylelint-config-inspector@latest build --outDir \"docs/docusaurus/static/stylelint-inspector\" --base \"/eslint-plugin-typefest/stylelint-inspector/\"",
+        "build:stylelint-inspector": "npx -y stylelint-config-inspector@latest build --outDir \"docs/docusaurus/static/stylelint-inspector\" --base \"/eslint-plugin-test-signal/stylelint-inspector/\"",
         "build:stylelint-inspector:local": "npx stylelint-config-inspector@latest",
         "build:types:cjs": "node -e \"require('node:fs').copyFileSync('dist/plugin.d.ts','dist/plugin.d.cts')\"",
         "changelog": "git-cliff --config cliff.toml --current",
@@ -143,7 +145,7 @@
         "lint:exports": "ts-unused-exports tsconfig.json src/plugin.ts --excludePathsFromReport=plugin.ts",
         "lint:fix": "cross-env NODE_OPTIONS=--max_old_space_size=16384 eslint . --cache --cache-strategy content --cache-location .cache/.eslintcache --fix",
         "lint:fix:quiet": "cross-env ESLINT_PROGRESS=off NODE_OPTIONS=--max_old_space_size=16384 eslint . --cache --cache-strategy content --cache-location .cache/.eslintcache --fix && echo \"Eslint fix done!\"",
-        "lint:grype": "grype . -c .grype.yaml --name eslint-plugin-typefest",
+        "lint:grype": "grype . -c .grype.yaml --name eslint-plugin-test-signal",
         "lint:knip": "npm run knip",
         "lint:knip:exports": "npm run knip -- --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates",
         "lint:knip:unused:exports": "npm run knip -- --dependencies --exports",
@@ -185,14 +187,12 @@
         "sync:peer-eslint-range": "node scripts/sync-peer-eslint-range.mjs",
         "sync:presets-rules-matrix": "node scripts/sync-presets-rules-matrix.mjs",
         "sync:readme-rules-table": "node scripts/sync-readme-rules-table.mjs",
-        "sync:readme-rules-table:update": "npm run build && cross-env TYPEFEST_UPDATE_GENERATED_DOCS=1 vitest run test/readme-rules-table-sync.test.ts -u",
+        "sync:readme-rules-table:update": "npm run build && cross-env TEST_SIGNAL_UPDATE_GENERATED_DOCS=1 vitest run test/readme-rules-table-sync.test.ts -u",
         "sync:readme-rules-table:write": "node scripts/sync-readme-rules-table.mjs --write",
         "sync:rules:check": "npm run sync:readme-rules-table && npm run sync:presets-rules-matrix",
-        "sync:rules:write": "npm run sync:readme-rules-table:write && npm run sync:presets-rules-matrix",
+        "sync:rules:write": "npm run sync:readme-rules-table:write && node scripts/sync-presets-rules-matrix.mjs --write",
         "pretest": "npm run build",
         "test": "vitest run",
-        "test:autofix:fixtures": "cross-env TYPEFEST_AUTOFIX_SMOKE=1 vitest run test/autofix-fixtures-all-rules-smoke.test.ts",
-        "test:autofix:fixtures:typed": "cross-env TYPEFEST_AUTOFIX_SMOKE=1 TYPEFEST_AUTOFIX_FIXTURE_DIR=test/fixtures/typed vitest run test/autofix-fixtures-all-rules-smoke.test.ts",
         "test:ci": "cross-env CI=true vitest run --reporter=default",
         "test:coverage": "vitest run --coverage --reporter=default",
         "test:coverage:detailed": "vitest run --coverage --reporter=verbose",
@@ -218,14 +218,13 @@
         "verify:readme-rules-table": "npm run build && npm run sync:rules:write"
     },
     "overrides": {
+        "fflate": "0.8.2",
         "jsonc-eslint-parser": "$jsonc-eslint-parser"
     },
     "dependencies": {
         "@typescript-eslint/parser": "^8.59.3",
         "@typescript-eslint/type-utils": "^8.59.3",
-        "@typescript-eslint/utils": "^8.59.3",
-        "ts-extras": "^1.0.0",
-        "type-fest": "^5.6.0"
+        "@typescript-eslint/utils": "^8.59.3"
     },
     "devDependencies": {
         "@arethetypeswrong/cli": "^0.18.2",

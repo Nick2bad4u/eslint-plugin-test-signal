@@ -6,15 +6,15 @@ export default defineConfig({
         {
             cases: [
                 {
-                    testPath: "./cases/prefer-ts-extras-is-defined/baseline.ts",
+                    testPath: "./cases/no-snapshot-only-tests/baseline.ts",
                 },
                 {
-                    testPath: "./cases/prefer-ts-extras-is-defined/complex.ts",
+                    testPath: "./cases/no-snapshot-only-tests/complex.ts",
                 },
             ],
-            name: "Rule: prefer-ts-extras-is-defined",
-            ruleId: "typefest/prefer-ts-extras-is-defined",
-            rulePath: "../src/rules/prefer-ts-extras-is-defined.ts",
+            name: "Rule: no-snapshot-only-tests",
+            ruleId: "test-signal/no-snapshot-only-tests",
+            rulePath: "../src/rules/no-snapshot-only-tests.ts",
             warmup: {
                 iterations: 15,
             },

@@ -1,21 +1,5 @@
-export interface PresetsRuleModule {
-    readonly meta?:
-        | {
-              readonly docs?:
-                  | {
-                        readonly typefestConfigs?:
-                            | readonly string[]
-                            | string
-                            | undefined;
-                        readonly url?: string | undefined;
-                    }
-                  | undefined;
-              readonly fixable?: string | undefined;
-              readonly hasSuggestions?: boolean | undefined;
-          }
-        | undefined;
-}
+import type { ReadmeRulesMap } from "./sync-readme-rules-table.mjs";
 
 export function generatePresetsRulesMatrixSectionFromRules(
-    rules: Readonly<Record<string, PresetsRuleModule>>
+    rules: ReadmeRulesMap
 ): string;

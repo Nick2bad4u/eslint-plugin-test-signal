@@ -11,20 +11,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import builtPlugin from "../dist/plugin.js";
 import { generateReadmeRulesSectionFromRules } from "./sync-readme-rules-table.mjs";
 
-/**
- * @typedef {Readonly<{
- *     meta?: {
- *         docs?: {
- *             typefestConfigs?: readonly string[] | string;
- *             url?: string;
- *         };
- *         fixable?: string;
- *         hasSuggestions?: boolean;
- *     };
- * }>} RuleModule
- */
-
-/** @typedef {Readonly<Record<string, RuleModule>>} RulesMap */
+/** @typedef {Readonly<Record<string, unknown>>} UnknownRecord */
 
 /**
  * @typedef {"all"
@@ -32,32 +19,16 @@ import { generateReadmeRulesSectionFromRules } from "./sync-readme-rules-table.m
  *     | "minimal"
  *     | "recommended"
  *     | "recommended-type-checked"
- *     | "strict"
- *     | "ts-extras/type-guards"
- *     | "type-fest/types"} PresetConfigName
+ *     | "strict"} PresetConfigName
  */
 
 const matrixSectionHeading = "## Rule matrix";
 const presetRulesSectionHeading = "## Rules in this preset";
-const recommendedTypeCheckedLegacyHeading =
-    "## What this preset adds on top of `recommended`";
-const experimentalLegacyHeading = "## What this preset adds on top of `all`";
 const presetsDocsDirectoryPath = "docs/rules/presets";
 
-/**
- * @param {string} markdown
- *
- * @returns {"\n" | "\r\n"}
- */
 const detectLineEnding = (markdown) =>
     markdown.includes("\r\n") ? "\r\n" : "\n";
 
-/**
- * @param {string} markdown
- * @param {"\n" | "\r\n"} lineEnding
- *
- * @returns {string}
- */
 const normalizeMarkdownLineEndings = (markdown, lineEnding) =>
     markdown.replace(/\r?\n/gv, lineEnding);
 
@@ -69,57 +40,32 @@ const presetDocSlugByConfigName = {
     recommended: "recommended",
     "recommended-type-checked": "recommended-type-checked",
     strict: "strict",
-    "ts-extras/type-guards": "ts-extras-type-guards",
-    "type-fest/types": "type-fest-types",
 };
 
 /** @type {readonly PresetConfigName[]} */
-const standardPresetConfigNames = [
+const presetConfigNames = [
     "all",
+    "experimental",
     "minimal",
     "recommended",
+    "recommended-type-checked",
     "strict",
-    "ts-extras/type-guards",
-    "type-fest/types",
 ];
 
-/**
- * @param {unknown} value
- *
- * @returns {value is Readonly<Record<string, unknown>>}
- */
 const isUnknownRecord = (value) =>
     typeof value === "object" && value !== null && !Array.isArray(value);
 
-/**
- * @param {readonly string[]} values
- *
- * @returns {readonly string[]}
- */
 const sortStrings = (values) =>
     [...values].toSorted((left, right) => left.localeCompare(right));
 
-/**
- * @param {string} configRuleKey
- *
- * @returns {null | string}
- */
 const toPluginRuleName = (configRuleKey) => {
-    if (!configRuleKey.startsWith("typefest/")) {
+    if (!configRuleKey.startsWith("test-signal/")) {
         return null;
     }
 
-    return configRuleKey.slice("typefest/".length);
+    return configRuleKey.slice("test-signal/".length);
 };
 
-/**
- * @param {PresetConfigName} presetConfigName
- *
- * @returns {readonly string[]}
- *
- * @throws {TypeError} When the built plugin preset config is missing or
- *   malformed.
- */
 const collectPresetRuleNames = (presetConfigName) => {
     const presetConfig = builtPlugin.configs[presetConfigName];
 
@@ -142,37 +88,25 @@ const collectPresetRuleNames = (presetConfigName) => {
     return sortStrings(names);
 };
 
-/**
- * @param {RuleModule} ruleModule
- *
- * @returns {"—" | "💡" | "🔧" | "🔧 💡"}
- */
 const getRuleFixIndicator = (ruleModule) => {
     const fixable = ruleModule.meta?.fixable === "code";
     const hasSuggestions = ruleModule.meta?.hasSuggestions === true;
 
     if (fixable && hasSuggestions) {
-        return "🔧 💡";
+        return "fix/suggest";
     }
 
     if (fixable) {
-        return "🔧";
+        return "fix";
     }
 
     if (hasSuggestions) {
-        return "💡";
+        return "suggest";
     }
 
-    return "—";
+    return "-";
 };
 
-/**
- * @param {string} ruleName
- *
- * @returns {RuleModule}
- *
- * @throws {TypeError} When the built plugin does not expose the requested rule.
- */
 const getRuleModuleByName = (ruleName) => {
     const candidate = builtPlugin.rules[ruleName];
 
@@ -180,16 +114,9 @@ const getRuleModuleByName = (ruleName) => {
         throw new TypeError(`Rule '${ruleName}' is missing from built plugin.`);
     }
 
-    return /** @type {RuleModule} */ (candidate);
+    return candidate;
 };
 
-/**
- * @param {string} ruleName
- *
- * @returns {string}
- *
- * @throws {TypeError} When rule metadata is missing the documentation URL.
- */
 const toPresetRuleRow = (ruleName) => {
     const ruleModule = getRuleModuleByName(ruleName);
     const docsUrl = ruleModule.meta?.docs?.url;
@@ -201,17 +128,12 @@ const toPresetRuleRow = (ruleName) => {
     return `| [\`${ruleName}\`](${docsUrl}) | ${getRuleFixIndicator(ruleModule)} |`;
 };
 
-/**
- * @param {readonly string[]} ruleNames
- *
- * @returns {string}
- */
 const createPresetRulesTable = (ruleNames) => {
     if (ruleNames.length === 0) {
         return [
             "| Rule | Fix |",
             "| --- | :-: |",
-            "| — | — |",
+            "| - | - |",
         ].join("\n");
     }
 
@@ -222,22 +144,14 @@ const createPresetRulesTable = (ruleNames) => {
     ].join("\n");
 };
 
-/**
- * @returns {readonly string[]}
- */
 const createFixLegendLines = () => [
     "- `Fix` legend:",
-    "  - `🔧` = autofixable",
-    "  - `💡` = suggestions available",
-    "  - `—` = report only",
+    "  - `fix` = autofixable",
+    "  - `suggest` = suggestions available",
+    "  - `-` = report only",
 ];
 
-/**
- * @param {PresetConfigName} presetConfigName
- *
- * @returns {string}
- */
-const generateStandardPresetRulesSection = (presetConfigName) => {
+const generatePresetRulesSection = (presetConfigName) => {
     const presetRuleNames = collectPresetRuleNames(presetConfigName);
 
     return [
@@ -250,81 +164,30 @@ const generateStandardPresetRulesSection = (presetConfigName) => {
     ].join("\n");
 };
 
-/**
- * @returns {string}
- */
-const generateRecommendedTypeCheckedRulesSection = () => {
-    const recommendedRuleNames = collectPresetRuleNames("recommended");
-    const recommendedTypeCheckedRuleNames = collectPresetRuleNames(
-        "recommended-type-checked"
-    );
-    const recommendedRuleNameSet = new Set(recommendedRuleNames);
-    const additionalTypeAwareRuleNames = recommendedTypeCheckedRuleNames.filter(
-        (ruleName) => !recommendedRuleNameSet.has(ruleName)
-    );
+const normalizeMarkdownTableSpacing = (markdown) =>
+    markdown
+        .replaceAll("\r\n", "\n")
+        .split("\n")
+        .map((line) => {
+            const trimmedLine = line.trimEnd();
 
-    return [
-        presetRulesSectionHeading,
-        "",
-        ...createFixLegendLines(),
-        "",
-        "### Type-aware additions over `recommended`",
-        "",
-        createPresetRulesTable(additionalTypeAwareRuleNames),
-        "",
-        "### Baseline rules inherited from `recommended`",
-        "",
-        createPresetRulesTable(recommendedRuleNames),
-        "",
-    ].join("\n");
-};
+            if (!/^\|.*\|$/v.test(trimmedLine)) {
+                return trimmedLine;
+            }
 
-/**
- * @returns {string}
- */
-const generateExperimentalRulesSection = () => {
-    const allRuleNames = collectPresetRuleNames("all");
-    const experimentalRuleNames = collectPresetRuleNames("experimental");
-    const allRuleNameSet = new Set(allRuleNames);
-    const experimentalOnlyRuleNames = experimentalRuleNames.filter(
-        (ruleName) => !allRuleNameSet.has(ruleName)
-    );
+            const cells = trimmedLine
+                .split("|")
+                .slice(1, -1)
+                .map((cell) => cell.trim());
 
-    return [
-        presetRulesSectionHeading,
-        "",
-        ...createFixLegendLines(),
-        "",
-        "### Experimental additions over `all`",
-        "",
-        createPresetRulesTable(experimentalOnlyRuleNames),
-        "",
-        "### Baseline rules inherited from `all`",
-        "",
-        createPresetRulesTable(allRuleNames),
-        "",
-    ].join("\n");
-};
+            return `| ${cells.join(" | ")} |`;
+        })
+        .join("\n");
 
-/**
- * @param {string} markdown
- * @param {readonly string[]} headingCandidates
- *
- * @returns {{ headingOffset: number; sectionEndOffset: number }}
- *
- * @throws {Error} When none of the candidate headings exist in the markdown.
- */
 const findSectionBoundsByHeadings = (markdown, headingCandidates) => {
-    /** @type {number[]} */
-    const headingOffsets = [];
-
-    for (const headingCandidate of headingCandidates) {
-        const headingOffset = markdown.indexOf(headingCandidate);
-
-        if (headingOffset >= 0) {
-            headingOffsets.push(headingOffset);
-        }
-    }
+    const headingOffsets = headingCandidates
+        .map((headingCandidate) => markdown.indexOf(headingCandidate))
+        .filter((headingOffset) => headingOffset >= 0);
 
     if (headingOffsets.length === 0) {
         throw new Error(
@@ -336,28 +199,18 @@ const findSectionBoundsByHeadings = (markdown, headingCandidates) => {
 
     const headingOffset = Math.min(...headingOffsets);
     const nextHeadingOffset = markdown.indexOf("\n## ", headingOffset + 1);
-    const sectionEndOffset =
-        nextHeadingOffset < 0 ? markdown.length : nextHeadingOffset + 1;
 
     return {
         headingOffset,
-        sectionEndOffset,
+        sectionEndOffset:
+            nextHeadingOffset < 0 ? markdown.length : nextHeadingOffset + 1,
     };
 };
 
-/**
- * @param {{
- *     markdown: string;
- *     generatedSection: string;
- *     headingCandidates: readonly string[];
- * }} input
- *
- * @returns {{ changed: boolean; nextMarkdown: string }}
- */
 const replaceMarkdownSection = ({
-    markdown,
     generatedSection,
     headingCandidates,
+    markdown,
 }) => {
     const lineEnding = detectLineEnding(markdown);
     const { headingOffset, sectionEndOffset } = findSectionBoundsByHeadings(
@@ -389,70 +242,10 @@ const replaceMarkdownSection = ({
     };
 };
 
-/**
- * Normalize markdown table row spacing so formatter-aligned columns compare
- * equivalently to compact generated rows.
- *
- * @param {string} markdown
- *
- * @returns {string}
- */
-const normalizeMarkdownTableSpacing = (markdown) =>
-    markdown
-        .replaceAll("\r\n", "\n")
-        .split("\n")
-        .map((line) => {
-            const trimmedLine = line.trimEnd();
-
-            if (!/^\|.*\|$/v.test(trimmedLine)) {
-                return trimmedLine;
-            }
-
-            const cells = trimmedLine
-                .split("|")
-                .slice(1, -1)
-                .map((cell) => {
-                    const trimmedCell = cell.trim();
-
-                    if (!/^:?-+:?$/v.test(trimmedCell)) {
-                        return trimmedCell;
-                    }
-
-                    const hasStartColon = trimmedCell.startsWith(":");
-                    const hasEndColon = trimmedCell.endsWith(":");
-
-                    if (hasStartColon && hasEndColon) {
-                        return ":-:";
-                    }
-
-                    if (hasStartColon) {
-                        return ":--";
-                    }
-
-                    if (hasEndColon) {
-                        return "--:";
-                    }
-
-                    return "---";
-                });
-
-            return `| ${cells.join(" | ")} |`;
-        })
-        .join("\n");
-
-/**
- * Generate the canonical presets page rule-matrix section from plugin rules
- * metadata.
- *
- * @param {RulesMap} rules - Plugin `rules` map.
- *
- * @returns {string} Full markdown section text starting at `## Rule matrix`.
- */
 export const generatePresetsRulesMatrixSectionFromRules = (rules) => {
     const readmeRulesSection = generateReadmeRulesSectionFromRules(rules)
         .replace(/\r\n/gv, "\n")
         .split("\n");
-
     const rulesBodyWithoutHeading = readmeRulesSection.slice(2);
 
     return [
@@ -462,12 +255,6 @@ export const generatePresetsRulesMatrixSectionFromRules = (rules) => {
     ].join("\n");
 };
 
-/**
- * @param {{
- *     workspaceRoot: string;
- *     writeChanges: boolean;
- * }} input
- */
 const syncPresetsRulesMatrixSection = async ({
     workspaceRoot,
     writeChanges,
@@ -478,9 +265,8 @@ const syncPresetsRulesMatrixSection = async ({
     );
     const presetsIndexMarkdown = await readFile(presetsIndexPath, "utf8");
     const generatedSection = generatePresetsRulesMatrixSectionFromRules(
-        /** @type {RulesMap} */ (builtPlugin.rules)
+        builtPlugin.rules
     );
-
     const sectionReplacementResult = replaceMarkdownSection({
         generatedSection,
         headingCandidates: [matrixSectionHeading],
@@ -493,42 +279,30 @@ const syncPresetsRulesMatrixSection = async ({
         };
     }
 
-    if (!writeChanges) {
-        return {
-            changed: true,
-        };
+    if (writeChanges) {
+        await writeFile(
+            presetsIndexPath,
+            sectionReplacementResult.nextMarkdown,
+            "utf8"
+        );
     }
-
-    await writeFile(
-        presetsIndexPath,
-        sectionReplacementResult.nextMarkdown,
-        "utf8"
-    );
 
     return {
         changed: true,
     };
 };
 
-/**
- * @param {{
- *     workspaceRoot: string;
- *     writeChanges: boolean;
- * }} input
- */
 const syncPresetPageRuleTables = async ({ workspaceRoot, writeChanges }) => {
-    /** @type {boolean} */
     let changed = false;
 
-    for (const presetConfigName of standardPresetConfigNames) {
+    for (const presetConfigName of presetConfigNames) {
         const presetDocPath = resolve(
             workspaceRoot,
             presetsDocsDirectoryPath,
             `${presetDocSlugByConfigName[presetConfigName]}.md`
         );
         const presetMarkdown = await readFile(presetDocPath, "utf8");
-        const generatedSection =
-            generateStandardPresetRulesSection(presetConfigName);
+        const generatedSection = generatePresetRulesSection(presetConfigName);
         const replacementResult = replaceMarkdownSection({
             generatedSection,
             headingCandidates: [presetRulesSectionHeading],
@@ -550,80 +324,11 @@ const syncPresetPageRuleTables = async ({ workspaceRoot, writeChanges }) => {
         }
     }
 
-    const recommendedTypeCheckedDocPath = resolve(
-        workspaceRoot,
-        presetsDocsDirectoryPath,
-        `${presetDocSlugByConfigName["recommended-type-checked"]}.md`
-    );
-    const recommendedTypeCheckedMarkdown = await readFile(
-        recommendedTypeCheckedDocPath,
-        "utf8"
-    );
-    const recommendedTypeCheckedSection =
-        generateRecommendedTypeCheckedRulesSection();
-    const recommendedTypeCheckedReplacementResult = replaceMarkdownSection({
-        generatedSection: recommendedTypeCheckedSection,
-        headingCandidates: [
-            presetRulesSectionHeading,
-            recommendedTypeCheckedLegacyHeading,
-        ],
-        markdown: recommendedTypeCheckedMarkdown,
-    });
-
-    if (!recommendedTypeCheckedReplacementResult.changed) {
-        // Continue on to the experimental preset page update below.
-    } else {
-        changed = true;
-
-        if (writeChanges) {
-            await writeFile(
-                recommendedTypeCheckedDocPath,
-                recommendedTypeCheckedReplacementResult.nextMarkdown,
-                "utf8"
-            );
-        }
-    }
-
-    const experimentalDocPath = resolve(
-        workspaceRoot,
-        presetsDocsDirectoryPath,
-        `${presetDocSlugByConfigName.experimental}.md`
-    );
-    const experimentalMarkdown = await readFile(experimentalDocPath, "utf8");
-    const experimentalSection = generateExperimentalRulesSection();
-    const experimentalReplacementResult = replaceMarkdownSection({
-        generatedSection: experimentalSection,
-        headingCandidates: [
-            presetRulesSectionHeading,
-            experimentalLegacyHeading,
-        ],
-        markdown: experimentalMarkdown,
-    });
-
-    if (!experimentalReplacementResult.changed) {
-        return {
-            changed,
-        };
-    }
-
-    changed = true;
-
-    if (writeChanges) {
-        await writeFile(
-            experimentalDocPath,
-            experimentalReplacementResult.nextMarkdown,
-            "utf8"
-        );
-    }
-
     return {
         changed,
     };
 };
 
-/**
- * @param {{ writeChanges: boolean }} input
- */
 const syncPresetsDocs = async ({ writeChanges }) => {
     const workspaceRoot = resolve(fileURLToPath(import.meta.url), "../..");
     const presetsMatrixResult = await syncPresetsRulesMatrixSection({
@@ -635,14 +340,8 @@ const syncPresetsDocs = async ({ writeChanges }) => {
         writeChanges,
     });
 
-    if (!presetsMatrixResult.changed && !presetPagesResult.changed) {
-        return {
-            changed: false,
-        };
-    }
-
     return {
-        changed: true,
+        changed: presetsMatrixResult.changed || presetPagesResult.changed,
     };
 };
 
@@ -652,7 +351,6 @@ const runCli = async () => {
 
     if (!result.changed) {
         console.log("Presets documentation tables are already synchronized.");
-
         return;
     }
 
@@ -660,7 +358,6 @@ const runCli = async () => {
         console.log(
             "Presets documentation tables synchronized from plugin metadata."
         );
-
         return;
     }
 
@@ -671,7 +368,7 @@ const runCli = async () => {
 };
 
 if (
-    process.argv[1] &&
+    typeof process.argv[1] === "string" &&
     import.meta.url === pathToFileURL(process.argv[1]).href
 ) {
     await runCli();

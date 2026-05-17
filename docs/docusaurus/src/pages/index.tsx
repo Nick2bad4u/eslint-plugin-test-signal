@@ -55,8 +55,8 @@ const heroBadges = [
  */
 const heroStats = [
     {
-        description: "Type-safe patterns from type-fest and ts-extras.",
-        headline: "\uf0ca 70+ Rules",
+        description: "Focused coverage for the weakest test signals.",
+        headline: "\uf0ca 5 Rules",
     },
     {
         description: "Start small, then scale to stricter coverage.",
@@ -77,9 +77,9 @@ const overviewButtonIcon = "\udb81\udf1d";
 const comparePresetsButtonIcon = "\udb85\udc92";
 const heroKickerIcon = "\uf0ad";
 const heroKickerIcon2 = "\uf135";
-const packageName = "eslint-plugin-typefest";
-const homepageDescription = `Explore ${packageName} documentation, presets, and rule references for adopting type-fest and ts-extras patterns in modern TypeScript projects.`;
-const homepageKeywords = `${packageName}, type-fest, ts-extras, eslint rules, typescript linting, flat config`;
+const packageName = "eslint-plugin-test-signal";
+const homepageDescription = `Explore ${packageName} documentation, presets, and rule references for finding weak test signals in modern JavaScript and TypeScript projects.`;
+const homepageKeywords = `${packageName}, weak tests, test quality, eslint rules, vitest, jest, flat config`;
 const homepageStructuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
@@ -107,7 +107,7 @@ const homeCards = [
         icon: "\uf135",
         title: "Get Started",
         description:
-            "Install the plugin, enable a preset, and start enforcing type-safe ts-extras and type-fest patterns.",
+            "Install the plugin, enable a preset, and start finding weak test signals.",
         to: "/docs/rules/getting-started",
     },
     {
@@ -134,7 +134,7 @@ export default function Home() {
 
     return (
         <Layout
-            title="Type-safe ESLint rules for type-fest and ts-extras"
+            title="ESLint rules for weak test signals"
             description={homepageDescription}
         >
             <Head>
@@ -151,32 +151,29 @@ export default function Home() {
                     <div className={styles.heroGrid}>
                         <div>
                             <p className={styles.heroKicker}>
-                                {`${heroKickerIcon} ESLint plugin for modern TypeScript teams ${heroKickerIcon2}`}
+                                {`${heroKickerIcon} ESLint plugin for test quality ${heroKickerIcon2}`}
                             </p>
                             <Heading as="h1" className={styles.heroTitle}>
                                 {packageName}
                             </Heading>
                             <p className={styles.heroSubtitle}>
-                                ESLint rules that recommend safer, clearer
-                                TypeScript types, type guards, and other
-                                patterns by utilizing{" "}
+                                Find tests that pass without useful behavioral
+                                proof: empty async bodies, floating async
+                                assertions,{" "}
                                 <Link
-                                    className={`${styles.heroInlineLink} ${styles.heroInlineLinkTypeFest}`}
-                                    href="https://github.com/sindresorhus/type-fest"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    className={`${styles.heroInlineLink} ${styles.heroInlineLinkSnapshot}`}
+                                    to="/docs/rules/no-snapshot-only-tests"
                                 >
-                                    type-fest
+                                    snapshot-only checks
                                 </Link>{" "}
-                                and{" "}
+                                , mock-call-only assertions, and suites without{" "}
                                 <Link
-                                    className={`${styles.heroInlineLink} ${styles.heroInlineLinkTsExtras}`}
-                                    href="https://github.com/sindresorhus/ts-extras"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    className={`${styles.heroInlineLink} ${styles.heroInlineLinkNegative}`}
+                                    to="/docs/rules/require-negative-path"
                                 >
-                                    ts-extras
+                                    negative-path coverage
                                 </Link>
+                                .
                             </p>
 
                             <div className={styles.heroBadgeRow}>
