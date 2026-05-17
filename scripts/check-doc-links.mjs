@@ -67,10 +67,6 @@ const IGNORED_DIRECTORIES = new Set([
     ".stryker-tmp",
 ]);
 
-// Capture Markdown links like [text](url) and images ![alt](url)
-// NOTE: for more accuracy use a Markdown parser (remark) instead of regex.
-const LINK_PATTERN = /!?\[[^\]]*]\(([^)]+)\)/g;
-
 const EXTERNAL_PROTOCOLS = [
     "http:",
     "https:",
@@ -82,7 +78,92 @@ const EXTERNAL_PROTOCOLS = [
     "file:",
 ];
 
-const LEADING_BANG = /^!/;
+/**
+ * @typedef {Readonly<{
+ *     isImage: boolean;
+ *     link: string;
+ * }>} MarkdownLink
+ */
+
+/**
+ * @param {string} text
+ * @param {number} startIndex
+ * @param {string} opener
+ * @param {string} closer
+ *
+ * @returns {number}
+ */
+function findDelimitedEnd(text, startIndex, opener, closer) {
+    let depth = 0;
+
+    for (let index = startIndex; index < text.length; index += 1) {
+        const character = text.charAt(index);
+
+        if (character === "\\") {
+            index += 1;
+            continue;
+        }
+
+        if (character === opener) {
+            depth += 1;
+            continue;
+        }
+
+        if (character !== closer) {
+            continue;
+        }
+
+        if (depth === 0) {
+            return index;
+        }
+
+        depth -= 1;
+    }
+
+    return -1;
+}
+
+/**
+ * Extract Markdown inline links and images using a bounded, linear scan.
+ *
+ * @param {string} markdown
+ *
+ * @returns {MarkdownLink[]}
+ */
+function extractMarkdownLinks(markdown) {
+    /** @type {MarkdownLink[]} */
+    const links = [];
+
+    for (let index = 0; index < markdown.length; index += 1) {
+        const isImage = markdown.charAt(index) === "!";
+        const labelStart = isImage ? index + 1 : index;
+
+        if (markdown.charAt(labelStart) !== "[") {
+            continue;
+        }
+
+        const labelEnd = findDelimitedEnd(markdown, labelStart + 1, "[", "]");
+
+        if (labelEnd === -1 || markdown.charAt(labelEnd + 1) !== "(") {
+            continue;
+        }
+
+        const linkStart = labelEnd + 2;
+        const linkEnd = findDelimitedEnd(markdown, linkStart, "(", ")");
+
+        if (linkEnd === -1) {
+            continue;
+        }
+
+        links.push({
+            isImage,
+            link: markdown.slice(linkStart, linkEnd),
+        });
+        index = linkEnd;
+    }
+
+    return links;
+}
 
 /**
  * Truncate safely keeping the last `max` code points.
@@ -312,18 +393,16 @@ async function checkFile(markdownPath, issues, issueSet, metrics) {
     const content = await readFile(markdownPath, "utf8");
     // Skip fenced code blocks
     const contentWithoutCodeBlocks = content.replaceAll(/```[\s\S]*?```/g, "");
-    const matches = Array.from(contentWithoutCodeBlocks.matchAll(LINK_PATTERN));
+    const links = extractMarkdownLinks(contentWithoutCodeBlocks);
 
-    if (matches.length === 0) {
+    if (links.length === 0) {
         metrics.filesWithNoLinks++;
     } else {
         metrics.filesWithLinks++;
     }
 
-    for (const match of matches) {
-        const fullMatch = match[0];
-        const link = match[1];
-        if (LEADING_BANG.test(fullMatch)) {
+    for (const { isImage, link } of links) {
+        if (isImage) {
             metrics.imageLinksIgnored++;
             continue;
         }

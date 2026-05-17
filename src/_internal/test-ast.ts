@@ -67,6 +67,13 @@ const negativeTitlePattern =
 const notPropertyNames = new Set(["not"]);
 const promiseModifierNames = new Set(["rejects", "resolves"]);
 const rejectsPropertyNames = new Set(["rejects"]);
+const traversalMetadataKeys = new Set([
+    "comments",
+    "loc",
+    "parent",
+    "range",
+    "tokens",
+]);
 
 /** Resolved matcher call in an `expect(...)` assertion chain. */
 export type AssertionMatcherCall = Readonly<{
@@ -348,12 +355,22 @@ export const visitDescendants = (
     visitNode(node, visitor, new WeakSet<object>());
 };
 
-const visitNodeOutsideNestedFunctions = (
+const getAstChildNodesFromTraversalValue = (
+    value: unknown
+): readonly TSESTree.Node[] => {
+    if (Array.isArray(value)) {
+        return value.filter(isAstNode);
+    }
+
+    return isAstNode(value) ? [value] : [];
+};
+
+function visitNodeOutsideNestedFunctions(
     node: TSESTree.Node,
     root: TSESTree.Node,
     visitor: (child: TSESTree.Node) => void,
     seen: WeakSet<object>
-): void => {
+): void {
     if (seen.has(node)) {
         return;
     }
@@ -369,31 +386,15 @@ const visitNodeOutsideNestedFunctions = (
     const nodeRecord = node as unknown as Readonly<Record<string, unknown>>;
 
     for (const [key, value] of Object.entries(nodeRecord)) {
-        if (
-            key === "parent" ||
-            key === "tokens" ||
-            key === "comments" ||
-            key === "loc" ||
-            key === "range"
-        ) {
+        if (traversalMetadataKeys.has(key)) {
             continue;
         }
 
-        if (Array.isArray(value)) {
-            for (const item of value) {
-                if (isAstNode(item)) {
-                    visitNodeOutsideNestedFunctions(item, root, visitor, seen);
-                }
-            }
-
-            continue;
-        }
-
-        if (isAstNode(value)) {
-            visitNodeOutsideNestedFunctions(value, root, visitor, seen);
+        for (const childNode of getAstChildNodesFromTraversalValue(value)) {
+            visitNodeOutsideNestedFunctions(childNode, root, visitor, seen);
         }
     }
-};
+}
 
 /**
  * Visit descendants under a starting AST node without entering nested function

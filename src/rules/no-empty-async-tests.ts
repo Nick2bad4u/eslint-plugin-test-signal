@@ -19,16 +19,17 @@ const noEmptyAsyncTestsRule: TSESLint.RuleModule<MessageId> =
         return {
             CallExpression(node) {
                 const testCall = getTestCall(node);
+                const callback = testCall?.callback;
 
                 if (
-                    testCall === undefined ||
-                    !testCall.callback.async ||
-                    testCall.callback.body.type !== AST_NODE_TYPES.BlockStatement
+                    callback === undefined ||
+                    !callback.async ||
+                    callback.body.type !== AST_NODE_TYPES.BlockStatement
                 ) {
                     return;
                 }
 
-                const assertions = summarizeAssertions(testCall.callback);
+                const assertions = summarizeAssertions(callback);
 
                 if (assertions.assertionCount > 0) {
                     return;
@@ -36,7 +37,7 @@ const noEmptyAsyncTestsRule: TSESLint.RuleModule<MessageId> =
 
                 context.report({
                     messageId: "emptyAsyncTest",
-                    node: testCall.callback,
+                    node: callback,
                 });
             },
         };

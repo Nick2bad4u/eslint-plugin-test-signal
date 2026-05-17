@@ -29,9 +29,9 @@ describe("source plugin config wiring", () => {
         );
 
         expect(Object.keys(plugin.configs.minimal.rules)).toHaveLength(3);
-        expect(Object.keys(plugin.configs.recommended.rules)).toHaveLength(10);
-        expect(Object.keys(plugin.configs.strict.rules)).toHaveLength(14);
-        expect(Object.keys(plugin.configs.all.rules)).toHaveLength(14);
+        expect(Object.keys(plugin.configs.recommended.rules)).toHaveLength(16);
+        expect(Object.keys(plugin.configs.strict.rules)).toHaveLength(21);
+        expect(Object.keys(plugin.configs.all.rules)).toHaveLength(21);
         expect(experimentalRuleIds).toStrictEqual(
             expect.arrayContaining(expectedQualifiedRuleIds)
         );

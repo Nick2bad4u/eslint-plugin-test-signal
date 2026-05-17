@@ -176,24 +176,25 @@ const withGeneratedRuleCaseNames = (
     };
 };
 
-const patchRuleTesterRunWithGeneratedCaseNames = (
-    tester: Readonly<RuleTester>
-): RuleTester => {
-    const writableTester = tester as RuleTester;
-    const originalRun = writableTester.run.bind(writableTester);
-    writableTester.run = (ruleName, ruleModule, runCases) => {
+const patchRuleTesterRunWithGeneratedCaseNames = <
+    TRuleTester extends RuleTester,
+>(
+    tester: TRuleTester
+): TRuleTester => {
+    const originalRun = tester.run.bind(tester);
+    tester.run = (ruleName, ruleModule, runCases) => {
         (originalRun as (...args: UnknownArray) => void)(
             ruleName,
             ruleModule,
             withGeneratedRuleCaseNames(ruleName, runCases)
         );
     };
-    return writableTester;
+    return tester;
 };
 
-export const applySharedRuleTesterRunBehavior = (
-    tester: Readonly<RuleTester>
-): RuleTester => patchRuleTesterRunWithGeneratedCaseNames(tester);
+export const applySharedRuleTesterRunBehavior = <TRuleTester extends RuleTester>(
+    tester: TRuleTester
+): TRuleTester => patchRuleTesterRunWithGeneratedCaseNames(tester);
 
 export const repoPath = (...segments: readonly string[]): string =>
     path.join(process.cwd(), ...segments);

@@ -5,6 +5,6 @@ about behavior.
 
 Use the rule docs for day-to-day adoption:
 
-- [Overview](../../rules/overview.md)
-- [Getting started](../../rules/getting-started.md)
+- [Overview](/docs/rules/overview)
+- [Getting started](/docs/rules/getting-started)
 - [Presets](/docs/rules/presets)

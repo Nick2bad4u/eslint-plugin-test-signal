@@ -244,7 +244,7 @@ const replaceMarkdownSection = ({
 
 export const generatePresetsRulesMatrixSectionFromRules = (rules) => {
     const readmeRulesSection = generateReadmeRulesSectionFromRules(rules)
-        .replace(/\r\n/gv, "\n")
+        .replaceAll("\r\n", "\n")
         .split("\n");
     const rulesBodyWithoutHeading = readmeRulesSection.slice(2);
 

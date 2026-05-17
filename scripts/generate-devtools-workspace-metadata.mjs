@@ -130,7 +130,9 @@ try {
     const message =
         error instanceof Error
             ? error.message
-            : String(error ?? "Unknown error");
+            : typeof error === "string"
+              ? error
+              : "Unknown error";
 
     console.error(message);
     process.exitCode = 1;

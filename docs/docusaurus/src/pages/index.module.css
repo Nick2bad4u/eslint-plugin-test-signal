@@ -140,7 +140,7 @@
     &:hover,
     &:focus {
         border-color: rgb(255 255 255 / 74%);
-        background: rgb(255 255 255 / 16%);
+        background: #0f172a;
         color: #ffffff;
         text-decoration: none;
         transform: translateY(-1px);
@@ -161,8 +161,8 @@
     &:hover,
     &:focus {
         border-color: rgb(94 234 212 / 82%);
-        background: rgb(13 148 136 / 38%);
-        color: rgb(240 253 250);
+        background: #0f766e;
+        color: #ffffff;
     }
 }
 
@@ -174,8 +174,8 @@
     &:hover,
     &:focus {
         border-color: rgb(103 232 249 / 82%);
-        background: rgb(8 145 178 / 38%);
-        color: rgb(240 249 255);
+        background: #0e7490;
+        color: #ffffff;
     }
 }
 
@@ -300,8 +300,8 @@
     &:hover,
     &:focus {
         border-color: rgb(204 251 241 / 56%);
-        background-color: #0d9488;
-        color: rgb(240 253 250);
+        background: #0f766e;
+        color: #ffffff;
     }
 }
 
