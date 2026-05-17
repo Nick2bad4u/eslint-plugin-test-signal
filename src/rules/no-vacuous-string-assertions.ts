@@ -8,6 +8,7 @@ import {
     type TSESLint,
     type TSESTree,
 } from "@typescript-eslint/utils";
+import { arrayAt, isDefined, setHas } from "ts-extras";
 
 import {
     getAssertionMatcherCall,
@@ -34,7 +35,7 @@ const isMatchAllRegexLiteral = (
 ): boolean =>
     node?.type === AST_NODE_TYPES.Literal &&
     node.value instanceof RegExp &&
-    matchAllRegexSources.has(node.value.source);
+    setHas(matchAllRegexSources, node.value.source);
 
 const getStaticPropertyName = (
     property: TSESTree.MemberExpression["property"]
@@ -64,9 +65,9 @@ const isEmptyStringAsymmetricMatcher = (
     const matcherName = getStaticPropertyName(node.callee.property);
 
     return (
-        matcherName !== undefined &&
-        emptyStringMatcherNames.has(matcherName) &&
-        getStringLiteralValue(node.arguments.at(0)) === ""
+        isDefined(matcherName) &&
+        setHas(emptyStringMatcherNames, matcherName) &&
+        getStringLiteralValue(arrayAt(node.arguments, 0)) === ""
     );
 };
 
@@ -74,7 +75,7 @@ const isVacuousExpectedString = (
     matcherName: string,
     expected: TSESTree.CallExpressionArgument | undefined
 ): boolean =>
-    (directStringMatcherNames.has(matcherName) &&
+    (setHas(directStringMatcherNames, matcherName) &&
         (getStringLiteralValue(expected) === "" ||
             isMatchAllRegexLiteral(expected))) ||
     isEmptyStringAsymmetricMatcher(expected);
@@ -87,7 +88,7 @@ const noVacuousStringAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -105,10 +106,10 @@ const noVacuousStringAssertionsRule: TSESLint.RuleModule<MessageId> =
                                 getAssertionMatcherCall(descendant);
 
                             if (
-                                assertion === undefined ||
+                                !isDefined(assertion) ||
                                 !isVacuousExpectedString(
                                     assertion.matcherName,
-                                    assertion.matcherCall.arguments.at(0)
+                                    arrayAt(assertion.matcherCall.arguments, 0)
                                 )
                             ) {
                                 return;

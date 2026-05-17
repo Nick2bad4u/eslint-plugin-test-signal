@@ -8,6 +8,7 @@ import {
     type TSESLint,
     type TSESTree,
 } from "@typescript-eslint/utils";
+import { arrayAt, isDefined, setHas } from "ts-extras";
 
 import {
     getAssertionMatcherCall,
@@ -48,7 +49,7 @@ const getComparableText = (
     sourceCode: Readonly<TSESLint.SourceCode>,
     node: TSESTree.CallExpressionArgument | undefined
 ): string | undefined =>
-    node === undefined || !isComparableExpression(node)
+    !isDefined(node) || !isComparableExpression(node)
         ? undefined
         : sourceCode.getText(unwrapExpression(node));
 
@@ -60,7 +61,7 @@ const noIdenticalExpectedActualRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -78,8 +79,9 @@ const noIdenticalExpectedActualRule: TSESLint.RuleModule<MessageId> =
                                 getAssertionMatcherCall(descendant);
 
                             if (
-                                assertion === undefined ||
-                                !equalityMatcherNames.has(
+                                !isDefined(assertion) ||
+                                !setHas(
+                                    equalityMatcherNames,
                                     assertion.matcherName
                                 )
                             ) {
@@ -88,16 +90,16 @@ const noIdenticalExpectedActualRule: TSESLint.RuleModule<MessageId> =
 
                             const actualText = getComparableText(
                                 context.sourceCode,
-                                assertion.expectCall.arguments.at(0)
+                                arrayAt(assertion.expectCall.arguments, 0)
                             );
                             const expectedText = getComparableText(
                                 context.sourceCode,
-                                assertion.matcherCall.arguments.at(0)
+                                arrayAt(assertion.matcherCall.arguments, 0)
                             );
 
                             if (
-                                actualText === undefined ||
-                                expectedText === undefined ||
+                                !isDefined(actualText) ||
+                                !isDefined(expectedText) ||
                                 actualText !== expectedText
                             ) {
                                 return;

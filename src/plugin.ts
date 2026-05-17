@@ -3,8 +3,10 @@
  * Public plugin entrypoint for eslint-plugin-test-signal exports and preset wiring.
  */
 import type { ESLint, Linter } from "eslint";
+import type { Except, UnknownRecord } from "type-fest";
 
-import typeScriptParser from "@typescript-eslint/parser";
+import tsParser from "@typescript-eslint/parser";
+import { isEmpty, objectHasOwn, setHas } from "ts-extras";
 
 // eslint-disable-next-line import-x/extensions -- Avoid importing from the ESM entrypoint to preserve CJS compatibility.
 import packageJson from "../package.json" with { type: "json" };
@@ -51,7 +53,7 @@ type TestSignalConfigsContract = Record<
     InternalTestSignalConfigName,
     TestSignalPresetConfig
 >;
-type TestSignalPluginContract = Omit<ESLint.Plugin, "configs" | "rules"> & {
+type TestSignalPluginContract = Except<ESLint.Plugin, "configs" | "rules"> & {
     configs: TestSignalConfigsContract;
     meta: {
         name: string;
@@ -62,7 +64,7 @@ type TestSignalPluginContract = Omit<ESLint.Plugin, "configs" | "rules"> & {
     rules: NonNullable<ESLint.Plugin["rules"]>;
 };
 
-const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
+const isRecord = (value: unknown): value is Readonly<UnknownRecord> =>
     typeof value === "object" && value !== null;
 
 /**
@@ -79,7 +81,7 @@ function getPackageVersion(pkg: unknown): string {
 }
 
 const packageJsonValue: unknown = packageJson;
-const typeScriptParserValue: FlatLanguageOptions["parser"] = typeScriptParser;
+const parserValue: FlatLanguageOptions["parser"] = tsParser;
 
 const defaultParserOptions = {
     ecmaVersion: "latest",
@@ -104,7 +106,7 @@ const ruleDocsMetadataByRuleName =
 const rulePresetMembership = deriveRulePresetMembershipByRuleName(
     ruleDocsMetadataByRuleName
 );
-const typeCheckedRuleNames = deriveTypeCheckedRuleNameSet(
+const checkedRuleNames = deriveTypeCheckedRuleNameSet(
     ruleDocsMetadataByRuleName
 );
 
@@ -117,7 +119,10 @@ const createEmptyPresetRuleMap = (): Record<
     TestSignalRuleName[]
 > => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- The map is immediately populated for every canonical config name.
-    const presetRuleMap = {} as Record<InternalTestSignalConfigName, TestSignalRuleName[]>;
+    const presetRuleMap = {} as Record<
+        InternalTestSignalConfigName,
+        TestSignalRuleName[]
+    >;
 
     for (const configName of testSignalConfigNames) {
         presetRuleMap[configName] = [];
@@ -134,7 +139,7 @@ const derivePresetRuleNamesByConfig = (): Readonly<
     for (const { ruleName } of testSignalRuleCatalogEntries) {
         const configNames = rulePresetMembership[ruleName];
 
-        if (configNames.length === 0) {
+        if (isEmpty(configNames)) {
             throw new TypeError(
                 `Rule '${ruleName}' is missing preset membership metadata.`
             );
@@ -174,7 +179,7 @@ const presetRuleNamesByConfig = derivePresetRuleNamesByConfig();
 const recommendedRuleNames: TestSignalRuleName[] = [];
 
 for (const ruleName of presetRuleNamesByConfig.recommended) {
-    if (!typeCheckedRuleNames.has(ruleName)) {
+    if (!setHas(checkedRuleNames, ruleName)) {
         recommendedRuleNames.push(ruleName);
     }
 }
@@ -207,14 +212,14 @@ function withTestSignalPlugin(
 
     if (
         options.requiresTypeChecking &&
-        !Object.hasOwn(parserOptions, "projectService")
+        !objectHasOwn(parserOptions, "projectService")
     ) {
         Reflect.set(parserOptions, "projectService", true);
     }
 
     const languageOptions: FlatLanguageOptions = {
         ...existingLanguageOptions,
-        parser: existingLanguageOptions["parser"] ?? typeScriptParserValue,
+        parser: existingLanguageOptions["parser"] ?? parserValue,
         parserOptions,
     };
 

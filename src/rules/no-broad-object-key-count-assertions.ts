@@ -8,6 +8,7 @@ import {
     type TSESLint,
     type TSESTree,
 } from "@typescript-eslint/utils";
+import { arrayAt, isDefined } from "ts-extras";
 
 import {
     assertionChainHasProperty,
@@ -50,15 +51,14 @@ const isNonEmptyKeyCountAssertion = (
     expectedValue: number | undefined,
     hasNot: boolean
 ): boolean => {
-    if (expectedValue === undefined) {
+    if (!isDefined(expectedValue)) {
         return false;
     }
 
     if (!hasNot) {
         return (
             (matcherName === "toBeGreaterThan" && expectedValue === 0) ||
-            (matcherName === "toBeGreaterThanOrEqual" &&
-                expectedValue === 1)
+            (matcherName === "toBeGreaterThanOrEqual" && expectedValue === 1)
         );
     }
 
@@ -76,7 +76,7 @@ const noBroadObjectKeyCountAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -94,9 +94,9 @@ const noBroadObjectKeyCountAssertionsRule: TSESLint.RuleModule<MessageId> =
                                 getAssertionMatcherCall(descendant);
 
                             if (
-                                assertion === undefined ||
+                                !isDefined(assertion) ||
                                 !isObjectKeysLengthSubject(
-                                    assertion.expectCall.arguments.at(0)
+                                    arrayAt(assertion.expectCall.arguments, 0)
                                 )
                             ) {
                                 return;
@@ -107,7 +107,7 @@ const noBroadObjectKeyCountAssertionsRule: TSESLint.RuleModule<MessageId> =
                                 notPropertyNames
                             );
                             const expectedValue = getNumericLiteralValue(
-                                assertion.matcherCall.arguments.at(0)
+                                arrayAt(assertion.matcherCall.arguments, 0)
                             );
 
                             if (

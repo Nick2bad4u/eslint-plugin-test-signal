@@ -2,19 +2,17 @@
  * @packageDocumentation
  * Rule that reports async tests without assertions.
  */
-import { AST_NODE_TYPES, type TSESLint } from "@typescript-eslint/utils";
 
-import {
-    getTestCall,
-    summarizeAssertions,
-} from "../_internal/test-ast.js";
+import { AST_NODE_TYPES, type TSESLint } from "@typescript-eslint/utils";
+import { isDefined } from "ts-extras";
+
+import { getTestCall, summarizeAssertions } from "../_internal/test-ast.js";
 import { createTypedRule } from "../_internal/typed-rule.js";
 
 type MessageId = "emptyAsyncTest";
 
 /** Rule module for `test-signal/no-empty-async-tests`. */
-const noEmptyAsyncTestsRule: TSESLint.RuleModule<MessageId> =
-    createTypedRule({
+const noEmptyAsyncTestsRule: TSESLint.RuleModule<MessageId> = createTypedRule({
     create(context) {
         return {
             CallExpression(node) {
@@ -22,7 +20,7 @@ const noEmptyAsyncTestsRule: TSESLint.RuleModule<MessageId> =
                 const callback = testCall?.callback;
 
                 if (
-                    callback === undefined ||
+                    !isDefined(callback) ||
                     !callback.async ||
                     callback.body.type !== AST_NODE_TYPES.BlockStatement
                 ) {
@@ -45,7 +43,8 @@ const noEmptyAsyncTestsRule: TSESLint.RuleModule<MessageId> =
     defaultOptions: [],
     meta: {
         docs: {
-            description: "disallow async tests that never execute an assertion.",
+            description:
+                "disallow async tests that never execute an assertion.",
             recommended: true,
             requiresTypeChecking: false,
             testSignalConfigs: [

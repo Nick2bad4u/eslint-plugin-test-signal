@@ -2,7 +2,9 @@
  * @packageDocumentation
  * Rule that reports throw assertions without an expected error shape.
  */
+
 import { AST_NODE_TYPES, type TSESLint } from "@typescript-eslint/utils";
+import { isDefined, setHas } from "ts-extras";
 
 import {
     assertionChainHasProperty,
@@ -25,7 +27,7 @@ const requireErrorMessageAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -34,13 +36,15 @@ const requireErrorMessageAssertionsRule: TSESLint.RuleModule<MessageId> =
                             return;
                         }
 
-                        const matcherCall =
-                            getAssertionMatcherCall(descendant);
+                        const matcherCall = getAssertionMatcherCall(descendant);
 
                         if (
-                            matcherCall === undefined ||
+                            !isDefined(matcherCall) ||
                             matcherCall.matcherCall.arguments.length > 0 ||
-                            !throwMatcherNames.has(matcherCall.matcherName) ||
+                            !setHas(
+                                throwMatcherNames,
+                                matcherCall.matcherName
+                            ) ||
                             assertionChainHasProperty(
                                 matcherCall.expectCall,
                                 notPropertyNames

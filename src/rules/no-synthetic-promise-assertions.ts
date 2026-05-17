@@ -9,6 +9,7 @@ import {
     type TSESLint,
     type TSESTree,
 } from "@typescript-eslint/utils";
+import { arrayAt, isDefined, setHas } from "ts-extras";
 
 import {
     assertionChainHasProperty,
@@ -51,8 +52,8 @@ const isSyntheticPromiseCall = (
     const propertyName = getStaticPropertyName(node.callee.property);
 
     return (
-        propertyName !== undefined &&
-        syntheticPromiseMethodNames.has(propertyName)
+        isDefined(propertyName) &&
+        setHas(syntheticPromiseMethodNames, propertyName)
     );
 };
 
@@ -64,7 +65,7 @@ const noSyntheticPromiseAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -82,13 +83,13 @@ const noSyntheticPromiseAssertionsRule: TSESLint.RuleModule<MessageId> =
                                 getAssertionMatcherCall(descendant);
 
                             if (
-                                assertion === undefined ||
+                                !isDefined(assertion) ||
                                 !assertionChainHasProperty(
                                     assertion.expectCall,
                                     promiseModifierNames
                                 ) ||
                                 !isSyntheticPromiseCall(
-                                    assertion.expectCall.arguments.at(0)
+                                    arrayAt(assertion.expectCall.arguments, 0)
                                 )
                             ) {
                                 return;

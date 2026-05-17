@@ -67,18 +67,13 @@ describe("docusaurus site configuration integrity", () => {
 
         expect(developerDocIds.length).toBeGreaterThan(0);
 
-        for (const developerDocId of developerDocIds) {
-            expect(developerDocId).toBeDefined();
+        const missingDeveloperDocIds = developerDocIds.filter(
+            (developerDocId) =>
+                developerDocId === undefined ||
+                (!generatedTypedocDocIdPattern.test(developerDocId) &&
+                    getExistingDocPath(developerDocId) === undefined)
+        );
 
-            if (developerDocId === undefined) {
-                continue;
-            }
-
-            if (generatedTypedocDocIdPattern.test(developerDocId)) {
-                continue;
-            }
-
-            expect(getExistingDocPath(developerDocId)).toBeDefined();
-        }
+        expect(missingDeveloperDocIds).toStrictEqual([]);
     });
 });

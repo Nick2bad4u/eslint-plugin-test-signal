@@ -2,7 +2,9 @@
  * @packageDocumentation
  * Internal rule-creator wrapper for eslint-plugin-test-signal rules.
  */
+
 import { ESLintUtils, type TSESLint } from "@typescript-eslint/utils";
+import { isDefined } from "ts-extras";
 
 import type { TestSignalConfigReference } from "./test-signal-config-references.js";
 
@@ -34,8 +36,9 @@ const ruleCreator = createRuleCreator<TestSignalRuleDocs>(createRuleDocsUrl);
 /**
  * Rule-creator wrapper used by all plugin rules.
  *
- * @remarks The wrapper injects canonical catalog IDs and validates docs URLs
- * while preserving statically authored rule metadata.
+ * @remarks
+ * The wrapper injects canonical catalog IDs and validates docs URLs while
+ * preserving statically authored rule metadata.
  */
 export const createTypedRule: TestSignalRuleCreator = (ruleDefinition) => {
     const createdRule = ruleCreator(ruleDefinition);
@@ -45,8 +48,10 @@ export const createTypedRule: TestSignalRuleCreator = (ruleDefinition) => {
     const canonicalDocsUrl = createRuleDocsUrl(ruleDefinition.name);
     const ruleDocs = createdRule.meta.docs;
 
-    if (ruleDocs === undefined) {
-        throw new TypeError(`Rule '${ruleDefinition.name}' must declare meta.docs.`);
+    if (!isDefined(ruleDocs)) {
+        throw new TypeError(
+            `Rule '${ruleDefinition.name}' must declare meta.docs.`
+        );
     }
 
     if (ruleDocs.url !== canonicalDocsUrl) {

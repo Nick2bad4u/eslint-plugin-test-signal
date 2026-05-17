@@ -2,6 +2,7 @@
  * @packageDocumentation
  * Stable catalog IDs for all plugin rules.
  */
+import { objectFromEntries, setHas } from "ts-extras";
 
 /**
  * Catalog metadata for a single rule.
@@ -90,7 +91,8 @@ const toRuleCatalogId = (ruleNumber: number): TestSignalRuleCatalogId =>
 
 const isTestSignalRuleNamePattern = (
     ruleName: string
-): ruleName is TestSignalRuleNamePattern => orderedRuleNameSet.has(ruleName);
+): ruleName is TestSignalRuleNamePattern =>
+    setHas(orderedRuleNameSet, ruleName);
 
 /**
  * Canonical catalog metadata entries in stable display/order form.
@@ -111,7 +113,7 @@ export const testSignalRuleCatalogEntries: readonly TestSignalRuleCatalogEntry[]
  */
 export const testSignalRuleCatalogByRuleName: Readonly<
     Partial<Record<TestSignalRuleNamePattern, TestSignalRuleCatalogEntry>>
-> = Object.fromEntries(
+> = objectFromEntries(
     testSignalRuleCatalogEntries.map((entry) => [entry.ruleName, entry])
 );
 
@@ -170,7 +172,7 @@ export const validateRuleCatalogIntegrity = (): boolean => {
     const seenRuleIds = new Set<TestSignalRuleCatalogId>();
 
     for (const [index, entry] of testSignalRuleCatalogEntries.entries()) {
-        if (seenRuleIds.has(entry.ruleId)) {
+        if (setHas(seenRuleIds, entry.ruleId)) {
             return false;
         }
 

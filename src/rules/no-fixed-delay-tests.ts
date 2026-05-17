@@ -8,6 +8,7 @@ import {
     type TSESLint,
     type TSESTree,
 } from "@typescript-eslint/utils";
+import { arrayAt, isDefined, setHas } from "ts-extras";
 
 import {
     getTestCall,
@@ -18,7 +19,12 @@ import { createTypedRule } from "../_internal/typed-rule.js";
 
 type MessageId = "fixedDelay";
 
-const delayFunctionNames = new Set(["delay", "sleep", "timeout", "wait"]);
+const delayFunctionNames = new Set([
+    "delay",
+    "sleep",
+    "timeout",
+    "wait",
+]);
 
 const getStaticPropertyName = (
     property: TSESTree.MemberExpression["property"]
@@ -57,7 +63,7 @@ const isNumericDelayArgument = (
 
 const isSetTimeoutCallWithDelay = (node: TSESTree.CallExpression): boolean =>
     getCalleeName(node.callee) === "setTimeout" &&
-    isNumericDelayArgument(node.arguments.at(1));
+    isNumericDelayArgument(arrayAt(node.arguments, 1));
 
 const isPromiseConstructor = (node: TSESTree.NewExpression): boolean =>
     node.callee.type === AST_NODE_TYPES.Identifier &&
@@ -67,17 +73,17 @@ const isFixedDelayHelperCall = (node: TSESTree.CallExpression): boolean => {
     const calleeName = getCalleeName(node.callee);
 
     return (
-        calleeName !== undefined &&
+        isDefined(calleeName) &&
         (calleeName === "waitForTimeout" ||
-            delayFunctionNames.has(calleeName)) &&
-        isNumericDelayArgument(node.arguments.at(0))
+            setHas(delayFunctionNames, calleeName)) &&
+        isNumericDelayArgument(arrayAt(node.arguments, 0))
     );
 };
 
 const promiseExecutorContainsFixedDelay = (
     node: TSESTree.NewExpression
 ): boolean => {
-    const executor = node.arguments.at(0);
+    const executor = arrayAt(node.arguments, 0);
 
     if (
         executor?.type !== AST_NODE_TYPES.ArrowFunctionExpression &&
@@ -108,7 +114,7 @@ const noFixedDelayTestsRule: TSESLint.RuleModule<MessageId> = createTypedRule({
             CallExpression(node) {
                 const testCall = getTestCall(node);
 
-                if (testCall === undefined) {
+                if (!isDefined(testCall)) {
                     return;
                 }
 
@@ -145,8 +151,7 @@ const noFixedDelayTestsRule: TSESLint.RuleModule<MessageId> = createTypedRule({
     defaultOptions: [],
     meta: {
         docs: {
-            description:
-                "disallow fixed real-time delays in executable tests.",
+            description: "disallow fixed real-time delays in executable tests.",
             recommended: false,
             requiresTypeChecking: false,
             testSignalConfigs: [

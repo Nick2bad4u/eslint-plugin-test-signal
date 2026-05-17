@@ -8,6 +8,7 @@ import {
     type TSESLint,
     type TSESTree,
 } from "@typescript-eslint/utils";
+import { arrayAt, isDefined } from "ts-extras";
 
 import {
     assertionChainHasProperty,
@@ -58,7 +59,7 @@ const isTautologicalLengthComparison = (
     expectedValue: number | undefined,
     hasNot: boolean
 ): boolean => {
-    if (expectedValue === undefined) {
+    if (!isDefined(expectedValue)) {
         return false;
     }
 
@@ -83,7 +84,7 @@ const noTautologicalLengthAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -101,9 +102,9 @@ const noTautologicalLengthAssertionsRule: TSESLint.RuleModule<MessageId> =
                                 getAssertionMatcherCall(descendant);
 
                             if (
-                                assertion === undefined ||
+                                !isDefined(assertion) ||
                                 !isLengthMemberExpression(
-                                    assertion.expectCall.arguments.at(0)
+                                    arrayAt(assertion.expectCall.arguments, 0)
                                 )
                             ) {
                                 return;
@@ -114,7 +115,7 @@ const noTautologicalLengthAssertionsRule: TSESLint.RuleModule<MessageId> =
                                 notPropertyNames
                             );
                             const expectedValue = getNumericLiteralValue(
-                                assertion.matcherCall.arguments.at(0)
+                                arrayAt(assertion.matcherCall.arguments, 0)
                             );
 
                             if (

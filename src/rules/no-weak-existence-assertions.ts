@@ -2,7 +2,9 @@
  * @packageDocumentation
  * Rule that reports broad existence assertions that do not verify a concrete value.
  */
+
 import { AST_NODE_TYPES, type TSESLint } from "@typescript-eslint/utils";
+import { isDefined, setHas } from "ts-extras";
 
 import {
     assertionChainHasProperty,
@@ -25,7 +27,7 @@ const noWeakExistenceAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -42,7 +44,7 @@ const noWeakExistenceAssertionsRule: TSESLint.RuleModule<MessageId> =
                             const assertion =
                                 getAssertionMatcherCall(descendant);
 
-                            if (assertion === undefined) {
+                            if (!isDefined(assertion)) {
                                 return;
                             }
 
@@ -55,7 +57,8 @@ const noWeakExistenceAssertionsRule: TSESLint.RuleModule<MessageId> =
                                 !hasNot;
                             const isWeakNegatedAbsenceAssertion =
                                 hasNot &&
-                                negatedAbsenceMatcherNames.has(
+                                setHas(
+                                    negatedAbsenceMatcherNames,
                                     assertion.matcherName
                                 );
 

@@ -3,6 +3,9 @@
  * Derivation helpers for canonical rule docs metadata.
  */
 import type { TSESLint } from "@typescript-eslint/utils";
+import type { UnknownRecord } from "type-fest";
+
+import { arrayIncludes, isEmpty, isInteger } from "ts-extras";
 
 import {
     testSignalRuleCatalogEntries,
@@ -50,7 +53,7 @@ type TestSignalRuleDocsContract = Readonly<{
     url: string;
 }>;
 
-const isUnknownRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
+const isUnknownRecord = (value: unknown): value is Readonly<UnknownRecord> =>
     typeof value === "object" && value !== null && !Array.isArray(value);
 
 const normalizeConfigReferences = (
@@ -67,12 +70,12 @@ const normalizeConfigReferences = (
             );
         }
 
-        if (!references.includes(candidate)) {
+        if (!arrayIncludes(references, candidate)) {
             references.push(candidate);
         }
     }
 
-    if (references.length === 0) {
+    if (isEmpty(references)) {
         throw new TypeError(
             `Rule '${ruleName}' must declare at least one docs.testSignalConfigs reference.`
         );
@@ -115,10 +118,7 @@ const getRuleDocsContract = (
         );
     }
 
-    if (
-        typeof ruleId !== "string" ||
-        !/^R\d{3}$/v.test(ruleId)
-    ) {
+    if (typeof ruleId !== "string" || !/^R\d{3}$/v.test(ruleId)) {
         throw new TypeError(
             `Rule '${ruleName}' must declare docs.ruleId using the 'R###' format.`
         );
@@ -126,7 +126,7 @@ const getRuleDocsContract = (
 
     if (
         typeof ruleNumber !== "number" ||
-        !Number.isInteger(ruleNumber) ||
+        !isInteger(ruleNumber) ||
         ruleNumber < 1
     ) {
         throw new TypeError(

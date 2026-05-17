@@ -2,12 +2,12 @@
  * @packageDocumentation
  * Rule that reports executable tests without any assertion.
  */
+
 import type { TSESLint } from "@typescript-eslint/utils";
 
-import {
-    getTestCall,
-    summarizeAssertions,
-} from "../_internal/test-ast.js";
+import { isDefined } from "ts-extras";
+
+import { getTestCall, summarizeAssertions } from "../_internal/test-ast.js";
 import { createTypedRule } from "../_internal/typed-rule.js";
 
 type MessageId = "missingAssertion";
@@ -19,7 +19,7 @@ const requireAssertionsRule: TSESLint.RuleModule<MessageId> = createTypedRule({
             CallExpression(node) {
                 const testCall = getTestCall(node);
 
-                if (testCall === undefined) {
+                if (!isDefined(testCall)) {
                     return;
                 }
 

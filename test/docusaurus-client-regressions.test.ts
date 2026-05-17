@@ -38,8 +38,8 @@ describe("docusaurus client regressions", () => {
                     "utf8"
                 );
 
-                expect(sourceText).toContain(
-                    'globalThis.addEventListener("load", handleWindowLoad, { once: true });'
+                expect(sourceText).toMatch(
+                    /globalThis\.addEventListener\("load", handleWindowLoad, \{\s*once: true,\s*signal: listenerController\.signal,\s*\}\);/v
                 );
                 expect(sourceText).not.toContain(
                     'document.addEventListener("DOMContentLoaded", handleDOMContentLoaded);'

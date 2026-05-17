@@ -1,18 +1,22 @@
+import type { UnknownRecord } from "type-fest";
+
 /**
  * @packageDocumentation
  * Rule that reports assertions inside catch blocks.
  */
-import { AST_NODE_TYPES, type TSESLint, type TSESTree } from "@typescript-eslint/utils";
-
 import {
-    getTestCall,
-    visitDescendants,
-} from "../_internal/test-ast.js";
+    AST_NODE_TYPES,
+    type TSESLint,
+    type TSESTree,
+} from "@typescript-eslint/utils";
+import { isDefined } from "ts-extras";
+
+import { getTestCall, visitDescendants } from "../_internal/test-ast.js";
 import { createTypedRule } from "../_internal/typed-rule.js";
 
 type MessageId = "catchAssertion";
 
-const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
+const isRecord = (value: unknown): value is Readonly<UnknownRecord> =>
     typeof value === "object" && value !== null;
 
 const isAstNode = (value: unknown): value is TSESTree.Node =>
@@ -37,7 +41,7 @@ const isInsideCatchClause = (
     while (current !== boundary) {
         const parent = getParent(current);
 
-        if (parent === undefined) {
+        if (!isDefined(parent)) {
             return false;
         }
 
@@ -62,7 +66,7 @@ const noTryCatchAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 

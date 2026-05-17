@@ -2,7 +2,9 @@
  * @packageDocumentation
  * Rule that reports truthy/falsy assertions that do not verify a concrete value.
  */
+
 import { AST_NODE_TYPES, type TSESLint } from "@typescript-eslint/utils";
+import { isDefined, setHas } from "ts-extras";
 
 import {
     getAssertionMatcherCall,
@@ -23,7 +25,7 @@ const noWeakTruthyAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -32,12 +34,12 @@ const noWeakTruthyAssertionsRule: TSESLint.RuleModule<MessageId> =
                             return;
                         }
 
-                        const matcherCall =
-                            getAssertionMatcherCall(descendant);
+                        const matcherCall = getAssertionMatcherCall(descendant);
 
                         if (
-                            matcherCall === undefined ||
-                            !weakTruthyMatcherNames.has(
+                            !isDefined(matcherCall) ||
+                            !setHas(
+                                weakTruthyMatcherNames,
                                 matcherCall.matcherName
                             )
                         ) {

@@ -7,6 +7,7 @@ import {
     type TSESLint,
     type TSESTree,
 } from "@typescript-eslint/utils";
+import { arrayAt, isDefined, setHas } from "ts-extras";
 
 import {
     containsExpectCallOutsideNestedFunctions,
@@ -28,7 +29,7 @@ const getHookName = (
     callee: TSESTree.CallExpression["callee"]
 ): string | undefined =>
     callee.type === AST_NODE_TYPES.Identifier &&
-    hookFunctionNames.has(callee.name)
+    setHas(hookFunctionNames, callee.name)
         ? callee.name
         : undefined;
 
@@ -38,7 +39,7 @@ const getHookCallback = (
     | TSESTree.ArrowFunctionExpression
     | TSESTree.FunctionExpression
     | undefined => {
-    const callback = node.arguments.at(0);
+    const callback = arrayAt(node.arguments, 0);
 
     if (
         callback?.type === AST_NODE_TYPES.ArrowFunctionExpression ||
@@ -80,14 +81,14 @@ const noAssertionsInHooksRule: TSESLint.RuleModule<MessageId> = createTypedRule(
                 CallExpression(node) {
                     const hookName = getHookName(node.callee);
 
-                    if (hookName === undefined) {
+                    if (!isDefined(hookName)) {
                         return;
                     }
 
                     const callback = getHookCallback(node);
 
                     if (
-                        callback === undefined ||
+                        !isDefined(callback) ||
                         !containsExpectCallOutsideNestedFunctions(callback.body)
                     ) {
                         return;

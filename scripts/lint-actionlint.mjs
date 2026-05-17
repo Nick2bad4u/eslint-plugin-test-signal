@@ -17,6 +17,12 @@ import { spawnSync } from "node:child_process";
 import pc from "picocolors";
 const repoRoot = process.cwd();
 const workflowsDir = path.join(repoRoot, ".github", "workflows");
+const actionlintBin = path.join(
+    repoRoot,
+    "node_modules",
+    "actionlint",
+    "actionlint.cjs"
+);
 const rawArgs = process.argv.slice(2);
 const overrideExcluded = rawArgs.includes("--include-excluded");
 const excludedFiles = new Set(["FILL_EXCLUDED_FILES_HERE.yml"]);
@@ -123,9 +129,17 @@ if (useDefaultFiles) {
     );
 }
 
-const result = spawnSync("actionlint", [...userArgs, ...targetFiles], {
-    stdio: "inherit",
-});
+const result = spawnSync(
+    process.execPath,
+    [
+        actionlintBin,
+        ...userArgs,
+        ...targetFiles,
+    ],
+    {
+        stdio: "inherit",
+    }
+);
 
 if (result.error) {
     console.error(pc.red("Failed to run actionlint:"), result.error);

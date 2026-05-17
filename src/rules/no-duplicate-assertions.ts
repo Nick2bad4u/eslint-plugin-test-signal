@@ -2,7 +2,9 @@
  * @packageDocumentation
  * Rule that reports repeated identical assertion chains in the same test.
  */
+
 import { AST_NODE_TYPES, type TSESLint } from "@typescript-eslint/utils";
+import { isDefined, setHas } from "ts-extras";
 
 import {
     getAssertionMatcherCall,
@@ -24,7 +26,7 @@ const noDuplicateAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -43,7 +45,7 @@ const noDuplicateAssertionsRule: TSESLint.RuleModule<MessageId> =
                             const assertion =
                                 getAssertionMatcherCall(descendant);
 
-                            if (assertion === undefined) {
+                            if (!isDefined(assertion)) {
                                 return;
                             }
 
@@ -53,7 +55,7 @@ const noDuplicateAssertionsRule: TSESLint.RuleModule<MessageId> =
                                 )
                             );
 
-                            if (!seenAssertionTexts.has(assertionText)) {
+                            if (!setHas(seenAssertionTexts, assertionText)) {
                                 seenAssertionTexts.add(assertionText);
                                 return;
                             }

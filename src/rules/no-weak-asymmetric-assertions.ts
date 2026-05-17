@@ -8,6 +8,7 @@ import {
     type TSESLint,
     type TSESTree,
 } from "@typescript-eslint/utils";
+import { arrayAt, isDefined, setHas } from "ts-extras";
 
 import {
     getAssertionMatcherCall,
@@ -23,7 +24,11 @@ type ExpectMemberCall = Readonly<{
 
 type MessageId = "weakAsymmetricAssertion" | "weakEmptySubsetAssertion";
 
-const objectConstructorNames = new Set(["Array", "Function", "Object"]);
+const objectConstructorNames = new Set([
+    "Array",
+    "Function",
+    "Object",
+]);
 const subsetMatcherNames = new Set(["toMatchObject"]);
 const wholeValueMatcherNames = new Set([
     "toBe",
@@ -60,12 +65,12 @@ const getExpectMemberCall = (
             ? getStaticPropertyName(node.callee.property)
             : undefined;
 
-    return matcherName === undefined
-        ? undefined
-        : {
+    return isDefined(matcherName)
+        ? {
               matcherName,
               node,
-          };
+          }
+        : undefined;
 };
 
 const isEmptyArrayExpression = (
@@ -83,7 +88,7 @@ const isBroadAnyConstructorArgument = (
     node: TSESTree.CallExpressionArgument | undefined
 ): boolean =>
     node?.type === AST_NODE_TYPES.Identifier &&
-    objectConstructorNames.has(node.name);
+    setHas(objectConstructorNames, node.name);
 
 const isVacuousAsymmetricMatcher = (
     node: TSESTree.CallExpressionArgument | undefined
@@ -92,7 +97,7 @@ const isVacuousAsymmetricMatcher = (
         return false;
     }
 
-    if (node === undefined) {
+    if (!isDefined(node)) {
         return false;
     }
 
@@ -103,16 +108,18 @@ const isVacuousAsymmetricMatcher = (
     }
 
     if (memberCall?.matcherName === "any") {
-        return isBroadAnyConstructorArgument(memberCall.node.arguments.at(0));
+        return isBroadAnyConstructorArgument(
+            arrayAt(memberCall.node.arguments, 0)
+        );
     }
 
     if (memberCall?.matcherName === "arrayContaining") {
-        return isEmptyArrayExpression(memberCall.node.arguments.at(0));
+        return isEmptyArrayExpression(arrayAt(memberCall.node.arguments, 0));
     }
 
     return (
         memberCall?.matcherName === "objectContaining" &&
-        isEmptyObjectExpression(memberCall.node.arguments.at(0))
+        isEmptyObjectExpression(arrayAt(memberCall.node.arguments, 0))
     );
 };
 
@@ -120,7 +127,7 @@ const isWeakEmptySubsetAssertion = (
     matcherName: string,
     expected: TSESTree.CallExpressionArgument | undefined
 ): boolean =>
-    subsetMatcherNames.has(matcherName) &&
+    setHas(subsetMatcherNames, matcherName) &&
     expected?.type === AST_NODE_TYPES.ObjectExpression &&
     expected.properties.length === 0;
 
@@ -132,7 +139,7 @@ const noWeakAsymmetricAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -149,15 +156,18 @@ const noWeakAsymmetricAssertionsRule: TSESLint.RuleModule<MessageId> =
                             const assertion =
                                 getAssertionMatcherCall(descendant);
 
-                            if (assertion === undefined) {
+                            if (!isDefined(assertion)) {
                                 return;
                             }
 
-                            const expected =
-                                assertion.matcherCall.arguments.at(0);
+                            const expected = arrayAt(
+                                assertion.matcherCall.arguments,
+                                0
+                            );
 
                             if (
-                                wholeValueMatcherNames.has(
+                                setHas(
+                                    wholeValueMatcherNames,
                                     assertion.matcherName
                                 ) &&
                                 isVacuousAsymmetricMatcher(expected)

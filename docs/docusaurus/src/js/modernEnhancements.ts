@@ -144,17 +144,13 @@ function applySidebarLabelTokenColoring(): CleanupFunction {
 
     const processLinks = (sidebarLinks: readonly HTMLAnchorElement[]): void => {
         for (const link of sidebarLinks) {
-            if (isSidebarLinkTokenized(link)) {
-                continue;
-            }
-
             const linkLabel = link.textContent?.trim();
 
-            if (!linkLabel) {
-                continue;
-            }
-
-            if (isRuntimeSidebarLink(link)) {
+            if (
+                !isSidebarLinkTokenized(link) &&
+                linkLabel &&
+                isRuntimeSidebarLink(link)
+            ) {
                 const runtimePrefix = getRuntimeSidebarKindPrefix(linkLabel);
 
                 if (runtimePrefix !== null) {
@@ -176,11 +172,8 @@ function applySidebarLabelTokenColoring(): CleanupFunction {
                             tokenText: `${runtimePrefix}\u00A0`,
                         });
                     }
-
-                    continue;
                 }
             }
-
         }
     };
 
@@ -214,6 +207,7 @@ function applySidebarLabelTokenColoring(): CleanupFunction {
     const handleSidebarInteraction = (): void => {
         scheduleSidebarRefresh();
     };
+    const listenerController = new AbortController();
 
     const sidebarObserver =
         sidebarMenu === null
@@ -252,10 +246,12 @@ function applySidebarLabelTokenColoring(): CleanupFunction {
         subtree: true,
     });
 
-    sidebarMenu?.addEventListener("click", handleSidebarInteraction);
+    sidebarMenu?.addEventListener("click", handleSidebarInteraction, {
+        signal: listenerController.signal,
+    });
 
     return (): void => {
-        sidebarMenu?.removeEventListener("click", handleSidebarInteraction);
+        listenerController.abort();
         sidebarObserver?.disconnect();
 
         if (sidebarRefreshTimer) {
@@ -305,12 +301,16 @@ function createScrollIndicator(): CleanupFunction {
         const scrollPercent = (scrollTop / safeHeight) * 100;
         indicator.style.width = `${Math.max(0, Math.min(100, scrollPercent))}%`;
     };
+    const listenerController = new AbortController();
 
-    globalThis.addEventListener("scroll", update, { passive: true });
+    globalThis.addEventListener("scroll", update, {
+        passive: true,
+        signal: listenerController.signal,
+    });
     update();
 
     return (): void => {
-        globalThis.removeEventListener("scroll", update);
+        listenerController.abort();
         indicator.remove();
     };
 }
@@ -346,8 +346,11 @@ function applyThemeToggleAnimation(): CleanupFunction {
             animationTimer = null;
         }, 90);
     };
+    const listenerController = new AbortController();
 
-    themeToggle.addEventListener("click", handleClick);
+    themeToggle.addEventListener("click", handleClick, {
+        signal: listenerController.signal,
+    });
 
     return (): void => {
         if (animationTimer) {
@@ -355,7 +358,7 @@ function applyThemeToggleAnimation(): CleanupFunction {
             animationTimer = null;
         }
 
-        themeToggle.removeEventListener("click", handleClick);
+        listenerController.abort();
     };
 }
 
@@ -390,6 +393,7 @@ function initializeEnhancements(): CleanupFunction {
     const cleanupRef: CleanupRef = {
         current: null,
     };
+    const listenerController = new AbortController();
     let initialSetupFrame: null | number = null;
     let initialSetupTimer: null | ReturnType<typeof setTimeout> = null;
 
@@ -424,14 +428,16 @@ function initializeEnhancements(): CleanupFunction {
     };
 
     const handleWindowLoad = (): void => {
-        globalThis.removeEventListener("load", handleWindowLoad);
         scheduleInitialSetup();
     };
 
     if (document.readyState === "complete") {
         scheduleInitialSetup();
     } else {
-        globalThis.addEventListener("load", handleWindowLoad, { once: true });
+        globalThis.addEventListener("load", handleWindowLoad, {
+            once: true,
+            signal: listenerController.signal,
+        });
     }
 
     let routeChangeTimer: null | ReturnType<typeof setTimeout> = null;
@@ -457,7 +463,6 @@ function initializeEnhancements(): CleanupFunction {
     observer.observe(document.body, { childList: true, subtree: true });
 
     const handleBeforeUnload = (): void => {
-        globalThis.removeEventListener("load", handleWindowLoad);
         cancelInitialSetup();
         cleanupRef.current?.();
 
@@ -469,15 +474,20 @@ function initializeEnhancements(): CleanupFunction {
         observer.disconnect();
     };
 
-    globalThis.addEventListener("beforeunload", handleBeforeUnload);
+    globalThis.addEventListener("beforeunload", handleBeforeUnload, {
+        signal: listenerController.signal,
+    });
 
     return (): void => {
-        globalThis.removeEventListener("beforeunload", handleBeforeUnload);
+        listenerController.abort();
         handleBeforeUnload();
     };
 }
 
-if (typeof globalThis.window !== "undefined" && typeof document !== "undefined") {
+if (
+    typeof globalThis.window !== "undefined" &&
+    typeof document !== "undefined"
+) {
     initializeEnhancements();
     globalThis.window.initializeAdvancedFeatures = initializeAdvancedFeatures;
 }

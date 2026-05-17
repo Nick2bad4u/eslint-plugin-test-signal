@@ -7,6 +7,7 @@ import {
     type TSESLint,
     type TSESTree,
 } from "@typescript-eslint/utils";
+import { arrayAt, isDefined, setHas } from "ts-extras";
 
 import {
     getAssertionMatcherCall,
@@ -102,7 +103,7 @@ const noConstantAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -118,18 +119,34 @@ const noConstantAssertionsRule: TSESLint.RuleModule<MessageId> =
 
                             const assertion =
                                 getAssertionMatcherCall(descendant);
-                            const actual =
-                                assertion?.expectCall.arguments.at(0);
+
+                            if (!isDefined(assertion)) {
+                                return;
+                            }
+
+                            const actual = arrayAt(
+                                assertion.expectCall.arguments,
+                                0
+                            );
+
+                            if (!isDefined(actual)) {
+                                return;
+                            }
+
+                            if (actual.type === AST_NODE_TYPES.SpreadElement) {
+                                return;
+                            }
 
                             if (
-                                assertion === undefined ||
-                                actual === undefined ||
-                                actual.type === AST_NODE_TYPES.SpreadElement ||
-                                weakTruthyMatcherNames.has(
+                                setHas(
+                                    weakTruthyMatcherNames,
                                     assertion.matcherName
-                                ) ||
-                                !isStaticConstantExpression(actual)
+                                )
                             ) {
+                                return;
+                            }
+
+                            if (!isStaticConstantExpression(actual)) {
                                 return;
                             }
 

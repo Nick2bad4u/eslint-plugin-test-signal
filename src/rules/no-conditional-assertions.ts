@@ -1,18 +1,22 @@
+import type { UnknownRecord } from "type-fest";
+
 /**
  * @packageDocumentation
  * Rule that reports assertions hidden behind conditional control flow.
  */
-import { AST_NODE_TYPES, type TSESLint, type TSESTree } from "@typescript-eslint/utils";
-
 import {
-    getTestCall,
-    visitDescendants,
-} from "../_internal/test-ast.js";
+    AST_NODE_TYPES,
+    type TSESLint,
+    type TSESTree,
+} from "@typescript-eslint/utils";
+import { arrayIncludes, isDefined } from "ts-extras";
+
+import { getTestCall, visitDescendants } from "../_internal/test-ast.js";
 import { createTypedRule } from "../_internal/typed-rule.js";
 
 type MessageId = "conditionalAssertion";
 
-const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
+const isRecord = (value: unknown): value is Readonly<UnknownRecord> =>
     typeof value === "object" && value !== null;
 
 const isAstNode = (value: unknown): value is TSESTree.Node =>
@@ -44,11 +48,11 @@ const isConditionalBranch = (
         return parent.right === node;
     }
 
-	if (parent.type === AST_NODE_TYPES.SwitchCase) {
-		const consequent: readonly TSESTree.Node[] = parent.consequent;
+    if (parent.type === AST_NODE_TYPES.SwitchCase) {
+        const consequent: readonly TSESTree.Node[] = parent.consequent;
 
-		return consequent.includes(node);
-	}
+        return arrayIncludes(consequent, node);
+    }
 
     return false;
 };
@@ -62,7 +66,7 @@ const isInsideConditionalBranch = (
     while (current !== boundary) {
         const parent = getParent(current);
 
-        if (parent === undefined) {
+        if (!isDefined(parent)) {
             return false;
         }
 
@@ -84,7 +88,7 @@ const noConditionalAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 

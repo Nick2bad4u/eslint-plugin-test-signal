@@ -7,6 +7,7 @@ import {
     type TSESLint,
     type TSESTree,
 } from "@typescript-eslint/utils";
+import { arrayAt, isDefined } from "ts-extras";
 
 import {
     containsExpectCallOutsideNestedFunctions,
@@ -37,7 +38,7 @@ const getAsyncCallbackArgument = (
     | TSESTree.ArrowFunctionExpression
     | TSESTree.FunctionExpression
     | undefined => {
-    const callback = node.arguments.at(0);
+    const callback = arrayAt(node.arguments, 0);
 
     if (
         (callback?.type === AST_NODE_TYPES.ArrowFunctionExpression ||
@@ -62,7 +63,7 @@ const noAsyncForeachAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -81,7 +82,7 @@ const noAsyncForeachAssertionsRule: TSESLint.RuleModule<MessageId> =
                                 getAsyncCallbackArgument(descendant);
 
                             if (
-                                callback === undefined ||
+                                !isDefined(callback) ||
                                 !containsExpectCallOutsideNestedFunctions(
                                     callback.body
                                 )

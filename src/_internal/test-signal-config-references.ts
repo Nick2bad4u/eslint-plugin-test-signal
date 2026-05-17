@@ -2,6 +2,9 @@
  * @packageDocumentation
  * Shared test-signal preset/config reference constants and type guards.
  */
+import type { ArrayValues } from "type-fest";
+
+import { objectHasOwn } from "ts-extras";
 
 /** Canonical flat-config preset keys exposed through `plugin.configs`. */
 export const testSignalConfigNames = [
@@ -22,7 +25,7 @@ export type TestSignalConfigMetadata = Readonly<{
 }>;
 
 /** Canonical flat-config preset key type exposed through `plugin.configs`. */
-export type TestSignalConfigName = (typeof testSignalConfigNames)[number];
+export type TestSignalConfigName = ArrayValues<typeof testSignalConfigNames>;
 
 /**
  * Canonical metadata for every exported `test-signal` preset key.
@@ -93,8 +96,7 @@ export const testSignalConfigReferenceToName: Readonly<{
     "testSignal.configs.experimental": "experimental",
     "testSignal.configs.minimal": "minimal",
     "testSignal.configs.recommended": "recommended",
-    "testSignal.configs.recommended-type-checked":
-        "recommended-type-checked",
+    "testSignal.configs.recommended-type-checked": "recommended-type-checked",
     "testSignal.configs.strict": "strict",
     'testSignal.configs["recommended-type-checked"]':
         "recommended-type-checked",
@@ -110,4 +112,4 @@ export type TestSignalConfigReference =
 export const isTestSignalConfigReference = (
     value: string
 ): value is TestSignalConfigReference =>
-    Object.hasOwn(testSignalConfigReferenceToName, value);
+    objectHasOwn(testSignalConfigReferenceToName, value);

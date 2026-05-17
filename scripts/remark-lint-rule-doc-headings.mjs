@@ -353,15 +353,17 @@ const getSectionContent = (file, sectionHeading, nextSectionHeading) => {
 };
 
 /**
- * Check for at least one Markdown inline link without relying on a
- * backtracking regular expression.
+ * Check for at least one Markdown inline link without relying on a backtracking
+ * regular expression.
  *
  * @param {string} markdown
  *
  * @returns {boolean}
  */
 const hasMarkdownInlineLink = (markdown) => {
-    for (let index = 0; index < markdown.length; index += 1) {
+    let index = 0;
+
+    while (index < markdown.length) {
         const labelStart = markdown.indexOf("[", index);
 
         if (labelStart === -1) {
@@ -378,7 +380,7 @@ const hasMarkdownInlineLink = (markdown) => {
             }
         }
 
-        index = labelStart;
+        index = labelStart + 1;
     }
 
     return false;

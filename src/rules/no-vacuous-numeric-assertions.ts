@@ -8,6 +8,7 @@ import {
     type TSESLint,
     type TSESTree,
 } from "@typescript-eslint/utils";
+import { arrayAt, isDefined } from "ts-extras";
 
 import {
     assertionChainHasProperty,
@@ -45,7 +46,7 @@ const isVacuousInfiniteComparison = (
     infiniteSign: -1 | 1 | undefined,
     hasNot: boolean
 ): boolean => {
-    if (infiniteSign === undefined) {
+    if (!isDefined(infiniteSign)) {
         return false;
     }
 
@@ -78,7 +79,7 @@ const noVacuousNumericAssertionsRule: TSESLint.RuleModule<MessageId> =
                 CallExpression(node) {
                     const testCall = getTestCall(node);
 
-                    if (testCall === undefined) {
+                    if (!isDefined(testCall)) {
                         return;
                     }
 
@@ -95,7 +96,7 @@ const noVacuousNumericAssertionsRule: TSESLint.RuleModule<MessageId> =
                             const assertion =
                                 getAssertionMatcherCall(descendant);
 
-                            if (assertion === undefined) {
+                            if (!isDefined(assertion)) {
                                 return;
                             }
 
@@ -104,7 +105,7 @@ const noVacuousNumericAssertionsRule: TSESLint.RuleModule<MessageId> =
                                 notPropertyNames
                             );
                             const infiniteSign = getInfiniteSign(
-                                assertion.matcherCall.arguments.at(0)
+                                arrayAt(assertion.matcherCall.arguments, 0)
                             );
 
                             if (

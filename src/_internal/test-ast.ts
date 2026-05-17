@@ -1,13 +1,16 @@
+import type { UnknownRecord } from "type-fest";
+
 /**
  * @packageDocumentation
  * AST utilities for recognizing common JavaScript and TypeScript test shapes.
  */
 import { AST_NODE_TYPES, type TSESTree } from "@typescript-eslint/utils";
+import { arrayAt, isDefined, objectEntries, setHas } from "ts-extras";
 
 /** Names of supported test-case functions. */
-const testCaseFunctionNames = new Set(["it", "test"]);
+const testCaseFunctionNames: ReadonlySet<string> = new Set(["it", "test"]);
 /** Names of supported test-suite functions. */
-const testSuiteFunctionNames = new Set(["describe"]);
+const testSuiteFunctionNames: ReadonlySet<string> = new Set(["describe"]);
 /** Legacy focused aliases used by Jest/Vitest-style test frameworks. */
 const focusedTestFunctionNames = new Set(["fdescribe", "fit"]);
 /** Modifiers that focus a test or suite and hide surrounding coverage. */
@@ -75,6 +78,17 @@ const traversalMetadataKeys = new Set([
     "tokens",
 ]);
 
+const isTestOrSuiteFunctionName = (baseName: string): boolean =>
+    setHas(testCaseFunctionNames, baseName as unknown) ||
+    setHas(testSuiteFunctionNames, baseName as unknown);
+
+const isTraversalMetadataKey = (key: string): boolean =>
+    key === "parent" ||
+    key === "tokens" ||
+    key === "comments" ||
+    key === "loc" ||
+    key === "range";
+
 /**
  * Resolved matcher call in an `expect(...)` assertion chain.
  *
@@ -116,7 +130,7 @@ type FunctionLikeNode =
     | TSESTree.FunctionDeclaration
     | TSESTree.FunctionExpression;
 
-const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
+const isRecord = (value: unknown): value is Readonly<UnknownRecord> =>
     typeof value === "object" && value !== null;
 
 const isAstNode = (value: unknown): value is TSESTree.Node =>
@@ -172,7 +186,7 @@ const hasSkippedModifier = (
 
     const propertyName = getPropertyName(callee.property);
 
-    if (propertyName !== undefined && skippedTestModifiers.has(propertyName)) {
+    if (isDefined(propertyName) && setHas(skippedTestModifiers, propertyName)) {
         return true;
     }
 
@@ -192,7 +206,7 @@ const hasFocusedModifier = (
 
     const propertyName = getPropertyName(callee.property);
 
-    if (propertyName !== undefined && focusedTestModifiers.has(propertyName)) {
+    if (isDefined(propertyName) && setHas(focusedTestModifiers, propertyName)) {
         return true;
     }
 
@@ -217,7 +231,7 @@ const getStringLiteralValue = (
 const getTestCallback = (
     node: TSESTree.CallExpression
 ): TestCallback | undefined => {
-    const callback = node.arguments.at(1);
+    const callback = arrayAt(node.arguments, 1);
 
     if (
         callback?.type === AST_NODE_TYPES.ArrowFunctionExpression ||
@@ -236,8 +250,8 @@ const isNamedCall = (
     const baseName = getCalleeBaseName(node.callee);
 
     return (
-        baseName !== undefined &&
-        names.has(baseName) &&
+        isDefined(baseName) &&
+        setHas(names, baseName) &&
         !hasSkippedModifier(node.callee)
     );
 };
@@ -254,14 +268,14 @@ export const getTestCall = (
 
     const callback = getTestCallback(node);
 
-    if (callback === undefined) {
+    if (!isDefined(callback)) {
         return undefined;
     }
 
     return {
         callback,
         node,
-        title: getStringLiteralValue(node.arguments.at(0)),
+        title: getStringLiteralValue(arrayAt(node.arguments, 0)),
     };
 };
 
@@ -279,15 +293,13 @@ export const isFocusedTestLikeCall = (
 ): boolean => {
     const baseName = getCalleeBaseName(node.callee);
 
-    if (baseName === undefined) {
+    if (!isDefined(baseName)) {
         return false;
     }
 
     return (
-        focusedTestFunctionNames.has(baseName) ||
-        ((testCaseFunctionNames.has(baseName) ||
-            testSuiteFunctionNames.has(baseName)) &&
-            hasFocusedModifier(node.callee))
+        setHas(focusedTestFunctionNames, baseName) ||
+        (isTestOrSuiteFunctionName(baseName) && hasFocusedModifier(node.callee))
     );
 };
 
@@ -299,16 +311,24 @@ export const isDisabledTestLikeCall = (
 ): boolean => {
     const baseName = getCalleeBaseName(node.callee);
 
-    if (baseName === undefined) {
+    if (!isDefined(baseName)) {
         return false;
     }
 
     return (
-        disabledTestFunctionNames.has(baseName) ||
-        ((testCaseFunctionNames.has(baseName) ||
-            testSuiteFunctionNames.has(baseName)) &&
-            hasSkippedModifier(node.callee))
+        setHas(disabledTestFunctionNames, baseName) ||
+        (isTestOrSuiteFunctionName(baseName) && hasSkippedModifier(node.callee))
     );
+};
+
+const getAstChildNodesFromTraversalValue = (
+    value: unknown
+): readonly TSESTree.Node[] => {
+    if (Array.isArray(value)) {
+        return value.filter(isAstNode);
+    }
+
+    return isAstNode(value) ? [value] : [];
 };
 
 const visitNode = (
@@ -324,31 +344,17 @@ const visitNode = (
     visitor(node);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- ESTree nodes are traversed through their enumerable child fields.
-    const nodeRecord = node as unknown as Readonly<Record<string, unknown>>;
+    const nodeRecord = node as unknown as Readonly<UnknownRecord>;
 
-    for (const [key, value] of Object.entries(nodeRecord)) {
-        if (
-            key === "parent" ||
-            key === "tokens" ||
-            key === "comments" ||
-            key === "loc" ||
-            key === "range"
-        ) {
-            continue;
-        }
+    for (const [key, value] of objectEntries(nodeRecord)) {
+        if (!isTraversalMetadataKey(key)) {
+            const childNodes = Array.isArray(value)
+                ? value.filter(isAstNode)
+                : getAstChildNodesFromTraversalValue(value);
 
-        if (Array.isArray(value)) {
-            for (const item of value) {
-                if (isAstNode(item)) {
-                    visitNode(item, visitor, seen);
-                }
+            for (const childNode of childNodes) {
+                visitNode(childNode, visitor, seen);
             }
-
-            continue;
-        }
-
-        if (isAstNode(value)) {
-            visitNode(value, visitor, seen);
         }
     }
 };
@@ -361,16 +367,6 @@ export const visitDescendants = (
     visitor: (child: TSESTree.Node) => void
 ): void => {
     visitNode(node, visitor, new WeakSet<object>());
-};
-
-const getAstChildNodesFromTraversalValue = (
-    value: unknown
-): readonly TSESTree.Node[] => {
-    if (Array.isArray(value)) {
-        return value.filter(isAstNode);
-    }
-
-    return isAstNode(value) ? [value] : [];
 };
 
 function visitNodeOutsideNestedFunctions(
@@ -391,15 +387,13 @@ function visitNodeOutsideNestedFunctions(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- ESTree nodes are traversed through their enumerable child fields.
-    const nodeRecord = node as unknown as Readonly<Record<string, unknown>>;
+    const nodeRecord = node as unknown as Readonly<UnknownRecord>;
 
-    for (const [key, value] of Object.entries(nodeRecord)) {
-        if (traversalMetadataKeys.has(key)) {
-            continue;
-        }
-
-        for (const childNode of getAstChildNodesFromTraversalValue(value)) {
-            visitNodeOutsideNestedFunctions(childNode, root, visitor, seen);
+    for (const [key, value] of objectEntries(nodeRecord)) {
+        if (!setHas(traversalMetadataKeys, key)) {
+            for (const childNode of getAstChildNodesFromTraversalValue(value)) {
+                visitNodeOutsideNestedFunctions(childNode, root, visitor, seen);
+            }
         }
     }
 }
@@ -493,7 +487,7 @@ export const getAssertionMatcherCall = (
     const matcherName = getPropertyName(node.callee.property);
 
     if (
-        matcherName === undefined ||
+        !isDefined(matcherName) ||
         matcherName === "not" ||
         matcherName === "resolves" ||
         matcherName === "rejects"
@@ -503,13 +497,13 @@ export const getAssertionMatcherCall = (
 
     const expectCall = findExpectCallInAssertionChain(node.callee.object);
 
-    return expectCall === undefined
-        ? undefined
-        : {
+    return isDefined(expectCall)
+        ? {
               expectCall,
               matcherCall: node,
               matcherName,
-          };
+          }
+        : undefined;
 };
 
 const getAssertionMethodName = (
@@ -531,7 +525,7 @@ const getAssertionMethodName = (
             const propertyName = getPropertyName(parent.property);
 
             if (
-                propertyName !== undefined &&
+                isDefined(propertyName) &&
                 propertyName !== "not" &&
                 propertyName !== "resolves" &&
                 propertyName !== "rejects"
@@ -577,7 +571,10 @@ export const assertionChainHasProperty = (
         ) {
             const propertyName = getPropertyName(parent.property);
 
-            if (propertyName !== undefined && propertyNames.has(propertyName)) {
+            if (
+                isDefined(propertyName) &&
+                setHas(propertyNames, propertyName)
+            ) {
                 return true;
             }
         }
@@ -680,15 +677,15 @@ export const summarizeAssertions = (
         const hasNot = assertionChainHasProperty(node, notPropertyNames);
 
         if (
-            assertionMethodName !== undefined &&
-            mockCallAssertionNames.has(assertionMethodName)
+            isDefined(assertionMethodName) &&
+            setHas(mockCallAssertionNames, assertionMethodName)
         ) {
             mockCallAssertionCount += 1;
         }
 
         if (
-            assertionMethodName !== undefined &&
-            snapshotAssertionNames.has(assertionMethodName)
+            isDefined(assertionMethodName) &&
+            setHas(snapshotAssertionNames, assertionMethodName)
         ) {
             snapshotAssertionCount += 1;
         }
@@ -696,8 +693,8 @@ export const summarizeAssertions = (
         if (
             hasRejects ||
             hasNot ||
-            (assertionMethodName !== undefined &&
-                negativeAssertionNames.has(assertionMethodName))
+            (isDefined(assertionMethodName) &&
+                setHas(negativeAssertionNames, assertionMethodName))
         ) {
             negativeSignalCount += 1;
         }
@@ -723,4 +720,4 @@ export const summarizeAssertions = (
  * Check whether a test title gives a clear negative-path signal.
  */
 export const titleHasNegativeSignal = (title: string | undefined): boolean =>
-    title === undefined ? false : negativeTitlePattern.test(title);
+    isDefined(title) ? negativeTitlePattern.test(title) : false;

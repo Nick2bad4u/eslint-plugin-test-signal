@@ -133,18 +133,21 @@ function findDelimitedEnd(text, startIndex, opener, closer) {
 function extractMarkdownLinks(markdown) {
     /** @type {MarkdownLink[]} */
     const links = [];
+    let index = 0;
 
-    for (let index = 0; index < markdown.length; index += 1) {
+    while (index < markdown.length) {
         const isImage = markdown.charAt(index) === "!";
         const labelStart = isImage ? index + 1 : index;
 
         if (markdown.charAt(labelStart) !== "[") {
+            index += 1;
             continue;
         }
 
         const labelEnd = findDelimitedEnd(markdown, labelStart + 1, "[", "]");
 
         if (labelEnd === -1 || markdown.charAt(labelEnd + 1) !== "(") {
+            index += 1;
             continue;
         }
 
@@ -152,6 +155,7 @@ function extractMarkdownLinks(markdown) {
         const linkEnd = findDelimitedEnd(markdown, linkStart, "(", ")");
 
         if (linkEnd === -1) {
+            index += 1;
             continue;
         }
 
@@ -160,6 +164,7 @@ function extractMarkdownLinks(markdown) {
             link: markdown.slice(linkStart, linkEnd),
         });
         index = linkEnd;
+        index += 1;
     }
 
     return links;
