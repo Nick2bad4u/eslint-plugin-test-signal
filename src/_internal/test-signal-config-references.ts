@@ -31,37 +31,37 @@ export const testSignalConfigMetadataByName: Readonly<
     Record<TestSignalConfigName, TestSignalConfigMetadata>
 > = {
     all: {
-        icon: "A",
+        icon: "🟣",
         presetName: "test-signal:all",
         readmeOrder: 5,
         requiresTypeChecking: false,
     },
     experimental: {
-        icon: "E",
+        icon: "🧪",
         presetName: "test-signal:experimental",
         readmeOrder: 6,
         requiresTypeChecking: false,
     },
     minimal: {
-        icon: "M",
+        icon: "🟢",
         presetName: "test-signal:minimal",
         readmeOrder: 1,
         requiresTypeChecking: false,
     },
     recommended: {
-        icon: "R",
+        icon: "🟡",
         presetName: "test-signal:recommended",
         readmeOrder: 2,
         requiresTypeChecking: false,
     },
     "recommended-type-checked": {
-        icon: "T",
+        icon: "🟠",
         presetName: "test-signal:recommended-type-checked",
         readmeOrder: 3,
         requiresTypeChecking: false,
     },
     strict: {
-        icon: "S",
+        icon: "🔴",
         presetName: "test-signal:strict",
         readmeOrder: 4,
         requiresTypeChecking: false,
