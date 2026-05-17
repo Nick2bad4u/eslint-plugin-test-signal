@@ -30,6 +30,8 @@ signal beyond snapshots or mock call counters.
 | [`no-snapshot-only-tests`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-snapshot-only-tests) | - |
 | [`no-synthetic-promise-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-synthetic-promise-assertions) | - |
 | [`no-tautological-length-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-tautological-length-assertions) | - |
+| [`no-vacuous-numeric-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-vacuous-numeric-assertions) | - |
+| [`no-vacuous-string-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-vacuous-string-assertions) | - |
 | [`no-weak-asymmetric-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-weak-asymmetric-assertions) | - |
 | [`no-weak-existence-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-weak-existence-assertions) | - |
 | [`no-weak-truthy-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-weak-truthy-assertions) | - |

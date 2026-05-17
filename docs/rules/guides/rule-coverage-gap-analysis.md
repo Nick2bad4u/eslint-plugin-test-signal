@@ -16,5 +16,8 @@ Known gaps:
 - non-literal timer durations are not reported by `no-fixed-delay-tests`;
 - non-global promise factories are not treated as synthetic by
   `no-synthetic-promise-assertions`;
+- computed string and numeric thresholds are not evaluated by
+  `no-vacuous-string-assertions` or `no-vacuous-numeric-assertions`;
+- semantic aliases are not compared by `no-duplicate-assertions`;
 - visual snapshot review workflows may need local exceptions;
 - adapter tests may legitimately assert only mock-boundary calls.

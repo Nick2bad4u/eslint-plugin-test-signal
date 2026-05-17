@@ -14,6 +14,9 @@ The first rule set focuses on common weak-test signals:
 - length assertions that only prove length is non-negative;
 - fixed real-time waits that make tests slow or flaky;
 - synthetic Promise assertions that do not exercise code under test;
+- string and numeric assertions with vacuous expected values;
+- broad object key-count assertions that only prove non-emptiness;
+- duplicate assertion chains in the same test;
 - Promise assertions that are not awaited or returned;
 - async tests that contain no assertion;
 - suites that have no negative-path coverage signal.
@@ -52,4 +55,8 @@ checker work because the targeted patterns are visible directly in the test AST.
 | [`no-tautological-length-assertions`](./no-tautological-length-assertions.md) | Flags length assertions that only prove length is non-negative. |
 | [`no-fixed-delay-tests`](./no-fixed-delay-tests.md) | Flags fixed real-time delays in executable tests. |
 | [`no-synthetic-promise-assertions`](./no-synthetic-promise-assertions.md) | Flags `.resolves` and `.rejects` assertions against synthetic Promise values. |
+| [`no-vacuous-string-assertions`](./no-vacuous-string-assertions.md) | Flags string assertions with expected values that match anything. |
+| [`no-vacuous-numeric-assertions`](./no-vacuous-numeric-assertions.md) | Flags numeric bound assertions with infinite thresholds. |
+| [`no-broad-object-key-count-assertions`](./no-broad-object-key-count-assertions.md) | Flags object key-count assertions that only prove an object is non-empty. |
+| [`no-duplicate-assertions`](./no-duplicate-assertions.md) | Flags repeated identical assertion chains in the same test. |
 | [`require-negative-path`](./require-negative-path.md) | Flags test scopes without negative-path coverage signals. |

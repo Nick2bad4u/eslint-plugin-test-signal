@@ -15,9 +15,11 @@ It currently matches `strict`.
 | --- | :-: |
 | [`no-assertions-in-hooks`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-assertions-in-hooks) | - |
 | [`no-async-foreach-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-async-foreach-assertions) | - |
+| [`no-broad-object-key-count-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-broad-object-key-count-assertions) | - |
 | [`no-conditional-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-conditional-assertions) | - |
 | [`no-constant-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-constant-assertions) | - |
 | [`no-disabled-tests`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-disabled-tests) | - |
+| [`no-duplicate-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-duplicate-assertions) | - |
 | [`no-empty-async-tests`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-empty-async-tests) | - |
 | [`no-fixed-delay-tests`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-fixed-delay-tests) | - |
 | [`no-focused-tests`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-focused-tests) | - |
@@ -27,6 +29,8 @@ It currently matches `strict`.
 | [`no-synthetic-promise-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-synthetic-promise-assertions) | - |
 | [`no-tautological-length-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-tautological-length-assertions) | - |
 | [`no-try-catch-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-try-catch-assertions) | - |
+| [`no-vacuous-numeric-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-vacuous-numeric-assertions) | - |
+| [`no-vacuous-string-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-vacuous-string-assertions) | - |
 | [`no-weak-asymmetric-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-weak-asymmetric-assertions) | - |
 | [`no-weak-existence-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-weak-existence-assertions) | - |
 | [`no-weak-truthy-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-weak-truthy-assertions) | - |

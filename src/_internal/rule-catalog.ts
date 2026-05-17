@@ -40,7 +40,11 @@ export type TestSignalRuleNamePattern =
     | "no-weak-asymmetric-assertions"
     | "no-tautological-length-assertions"
     | "no-fixed-delay-tests"
-    | "no-synthetic-promise-assertions";
+    | "no-synthetic-promise-assertions"
+    | "no-vacuous-string-assertions"
+    | "no-vacuous-numeric-assertions"
+    | "no-broad-object-key-count-assertions"
+    | "no-duplicate-assertions";
 /* eslint-enable perfectionist/sort-union-types -- Resume regular union ordering outside the stable catalog list. */
 
 /**
@@ -72,6 +76,10 @@ const orderedRuleNames = [
     "no-tautological-length-assertions",
     "no-fixed-delay-tests",
     "no-synthetic-promise-assertions",
+    "no-vacuous-string-assertions",
+    "no-vacuous-numeric-assertions",
+    "no-broad-object-key-count-assertions",
+    "no-duplicate-assertions",
 ] as const satisfies readonly TestSignalRuleNamePattern[];
 /* eslint-enable perfectionist/sort-arrays -- Resume regular array ordering outside the stable catalog list. */
 
