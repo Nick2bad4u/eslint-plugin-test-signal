@@ -6,6 +6,7 @@ const readWorkspaceFile = (relativePath: string): string =>
     fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
 
 const siteDocsDirectory = path.join(process.cwd(), "docs/docusaurus/site-docs");
+const generatedTypedocDocIdPattern = /^developer\/api(?:\/|$)/v;
 
 const getExistingDocPath = (docId: string): string | undefined => {
     const exactMarkdownPath = path.join(siteDocsDirectory, `${docId}.md`);
@@ -70,6 +71,10 @@ describe("docusaurus site configuration integrity", () => {
             expect(developerDocId).toBeDefined();
 
             if (developerDocId === undefined) {
+                continue;
+            }
+
+            if (generatedTypedocDocIdPattern.test(developerDocId)) {
                 continue;
             }
 

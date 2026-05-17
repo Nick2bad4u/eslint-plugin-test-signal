@@ -2,13 +2,13 @@
  * @packageDocumentation
  * Contract test that keeps README rule matrix synchronized with plugin metadata.
  */
-/* eslint-disable vitest/no-conditional-tests -- Markdown synchronization helpers contain conditionals but never register tests conditionally. */
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
     generateReadmeRulesSectionFromRules,
+    normalizeRulesSectionMarkdown,
     syncReadmeRulesTable,
 } from "../scripts/sync-readme-rules-table.mjs";
 import testSignalPlugin from "../src/plugin";
@@ -25,27 +25,6 @@ const syncReadmeRulesTableIfRequested = async (): Promise<void> => {
         await syncReadmeRulesTable({ writeChanges: true });
     }
 };
-
-const normalizeMarkdownTableSpacing = (markdown: string): string =>
-    markdown
-        .replaceAll("\r\n", "\n")
-        .split("\n")
-        .map((line) => {
-            const trimmedLine = line.trimEnd();
-
-            if (!/^\|.*\|$/v.test(trimmedLine)) {
-                return trimmedLine;
-            }
-
-            const cells = trimmedLine
-                .split("|")
-                .slice(1, -1)
-                .map((cell) => cell.trim());
-
-            return `| ${cells.join(" | ")} |`;
-        })
-        .join("\n")
-        .trimEnd();
 
 const extractRulesSection = (markdown: string): string => {
     const headingOffset = markdown.indexOf(RULES_SECTION_HEADING);
@@ -81,10 +60,8 @@ describe("readme rules table synchronization", () => {
             rules
         );
 
-        expect(normalizeMarkdownTableSpacing(readmeRulesSection)).toBe(
-            normalizeMarkdownTableSpacing(expectedRulesSection)
+        expect(normalizeRulesSectionMarkdown(readmeRulesSection)).toBe(
+            normalizeRulesSectionMarkdown(expectedRulesSection)
         );
     });
 });
-
-/* eslint-enable vitest/no-conditional-tests -- Restore conditional-test enforcement after helper declarations. */

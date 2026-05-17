@@ -8,6 +8,7 @@ import {
     getTestCall,
     isTestSuiteCall,
     summarizeAssertions,
+    type TestCall,
     titleHasNegativeSignal,
 } from "../_internal/test-ast.js";
 import { createTypedRule } from "../_internal/typed-rule.js";
@@ -36,7 +37,9 @@ const requireNegativePathRule: TSESLint.RuleModule<MessageId> =
         const suiteStack: SuiteSummary[] = [rootSuite];
         let hasNestedSuite = false;
 
-        const addTestSignal = (testCall: ReturnType<typeof getTestCall>) => {
+        const addTestSignal = (
+            testCall: Readonly<TestCall> | undefined
+        ) => {
             if (testCall === undefined) {
                 return;
             }

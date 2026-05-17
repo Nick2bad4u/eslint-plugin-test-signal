@@ -75,28 +75,36 @@ const traversalMetadataKeys = new Set([
     "tokens",
 ]);
 
-/** Resolved matcher call in an `expect(...)` assertion chain. */
-export type AssertionMatcherCall = Readonly<{
-    expectCall: TSESTree.CallExpression;
-    matcherCall: TSESTree.CallExpression;
-    matcherName: string;
-}>;
+/**
+ * Resolved matcher call in an `expect(...)` assertion chain.
+ *
+ * @public
+ */
+export interface AssertionMatcherCall {
+    readonly expectCall: TSESTree.CallExpression;
+    readonly matcherCall: TSESTree.CallExpression;
+    readonly matcherName: string;
+}
 
-/** Collected assertion signal for one test body. */
-export type AssertionSummary = Readonly<{
-    assertionCount: number;
-    mockCallAssertionCount: number;
-    negativeSignalCount: number;
-    snapshotAssertionCount: number;
-    unawaitedAsyncAssertionNodes: readonly TSESTree.CallExpression[];
-}>;
+/**
+ * Collected assertion signal for one test body.
+ *
+ * @public
+ */
+export interface AssertionSummary {
+    readonly assertionCount: number;
+    readonly mockCallAssertionCount: number;
+    readonly negativeSignalCount: number;
+    readonly snapshotAssertionCount: number;
+    readonly unawaitedAsyncAssertionNodes: readonly TSESTree.CallExpression[];
+}
 
 /** Recognized test call metadata. */
-export type TestCall = Readonly<{
-    callback: TestCallback;
-    node: TSESTree.CallExpression;
-    title: string | undefined;
-}>;
+export interface TestCall {
+    readonly callback: TestCallback;
+    readonly node: TSESTree.CallExpression;
+    readonly title: string | undefined;
+}
 
 /** Minimal callback node type accepted by test analysis helpers. */
 export type TestCallback =
