@@ -1,7 +1,7 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
     "name": "eslint-plugin-test-signal",
-    "version": "1.2.9",
+    "version": "1.2.10",
     "private": false,
     "description": "ESLint rules that flag weak tests before they become false confidence.",
     "keywords": [
