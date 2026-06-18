@@ -21,54 +21,46 @@ const normalizeAssertionText = (text: string): string =>
 /** Rule module for `test-signal/no-duplicate-assertions`. */
 const noDuplicateAssertionsRule: TSESLint.RuleModule<MessageId> =
     createTypedRule({
-        create(context) {
-            return {
-                CallExpression(node) {
-                    const testCall = getTestCall(node);
+        create: (context) => ({
+            CallExpression(node) {
+                const testCall = getTestCall(node);
 
-                    if (!isDefined(testCall)) {
-                        return;
-                    }
+                if (!isDefined(testCall)) {
+                    return;
+                }
 
-                    const seenAssertionTexts = new Set<string>();
+                const seenAssertionTexts = new Set<string>();
 
-                    visitDescendantsOutsideNestedFunctions(
-                        testCall.callback.body,
-                        (descendant) => {
-                            if (
-                                descendant.type !==
-                                AST_NODE_TYPES.CallExpression
-                            ) {
-                                return;
-                            }
-
-                            const assertion =
-                                getAssertionMatcherCall(descendant);
-
-                            if (!isDefined(assertion)) {
-                                return;
-                            }
-
-                            const assertionText = normalizeAssertionText(
-                                context.sourceCode.getText(
-                                    assertion.matcherCall
-                                )
-                            );
-
-                            if (!setHas(seenAssertionTexts, assertionText)) {
-                                seenAssertionTexts.add(assertionText);
-                                return;
-                            }
-
-                            context.report({
-                                messageId: "duplicateAssertion",
-                                node: assertion.matcherCall,
-                            });
+                visitDescendantsOutsideNestedFunctions(
+                    testCall.callback.body,
+                    (descendant) => {
+                        if (descendant.type !== AST_NODE_TYPES.CallExpression) {
+                            return;
                         }
-                    );
-                },
-            };
-        },
+
+                        const assertion = getAssertionMatcherCall(descendant);
+
+                        if (!isDefined(assertion)) {
+                            return;
+                        }
+
+                        const assertionText = normalizeAssertionText(
+                            context.sourceCode.getText(assertion.matcherCall)
+                        );
+
+                        if (!setHas(seenAssertionTexts, assertionText)) {
+                            seenAssertionTexts.add(assertionText);
+                            return;
+                        }
+
+                        context.report({
+                            messageId: "duplicateAssertion",
+                            node: assertion.matcherCall,
+                        });
+                    }
+                );
+            },
+        }),
         defaultOptions: [],
         meta: {
             docs: {

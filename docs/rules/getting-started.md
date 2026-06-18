@@ -25,15 +25,15 @@ The preset targets common test file globs:
 import testSignal from "eslint-plugin-test-signal";
 
 export default [
-    {
-        plugins: {
-            "test-signal": testSignal,
-        },
-        rules: {
-            "test-signal/no-snapshot-only-tests": "error",
-            "test-signal/require-awaited-async-assertions": "error",
-        },
-    },
+ {
+  plugins: {
+   "test-signal": testSignal,
+  },
+  rules: {
+   "test-signal/no-snapshot-only-tests": "error",
+   "test-signal/require-awaited-async-assertions": "error",
+  },
+ },
 ];
 ```
 

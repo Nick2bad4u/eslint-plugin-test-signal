@@ -14,13 +14,13 @@ error path that should return the promise.
 
 ```ts
 it("resolves", async () => {
-    await expect(Promise.resolve("ok")).resolves.toBe("ok");
+ await expect(Promise.resolve("ok")).resolves.toBe("ok");
 });
 ```
 
 ```ts
 it("rejects", async () => {
-    await expect(Promise.reject(new Error("boom"))).rejects.toThrow("boom");
+ await expect(Promise.reject(new Error("boom"))).rejects.toThrow("boom");
 });
 ```
 
@@ -28,13 +28,13 @@ it("rejects", async () => {
 
 ```ts
 it("loads the user", async () => {
-    await expect(loadUser("user-1")).resolves.toEqual({ id: "user-1" });
+ await expect(loadUser("user-1")).resolves.toEqual({ id: "user-1" });
 });
 ```
 
 ```ts
 it("rejects invalid input", async () => {
-    await expect(saveUser({ id: "" })).rejects.toThrow("id is required");
+ await expect(saveUser({ id: "" })).rejects.toThrow("id is required");
 });
 ```
 

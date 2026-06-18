@@ -54,7 +54,7 @@ export type TestSignalRuleNamePattern =
  * @remarks
  * Append new rules to preserve existing IDs.
  */
-/* eslint-disable perfectionist/sort-arrays -- Keep this in stable catalog order so existing rule IDs never change. */
+
 const orderedRuleNames = [
     "no-empty-async-tests",
     "no-mock-call-only-tests",
@@ -82,7 +82,6 @@ const orderedRuleNames = [
     "no-broad-object-key-count-assertions",
     "no-duplicate-assertions",
 ] as const satisfies readonly TestSignalRuleNamePattern[];
-/* eslint-enable perfectionist/sort-arrays -- Resume regular array ordering outside the stable catalog list. */
 
 const orderedRuleNameSet: ReadonlySet<string> = new Set(orderedRuleNames);
 

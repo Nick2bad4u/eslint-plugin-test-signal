@@ -13,13 +13,13 @@ validation failure or a regression in setup.
 
 ```ts
 it("rejects invalid tokens", () => {
-    expect(() => parseToken("")).toThrow();
+ expect(() => parseToken("")).toThrow();
 });
 ```
 
 ```ts
 it("rejects missing users", async () => {
-    await expect(loadUser("missing")).rejects.toThrow();
+ await expect(loadUser("missing")).rejects.toThrow();
 });
 ```
 
@@ -27,13 +27,13 @@ it("rejects missing users", async () => {
 
 ```ts
 it("rejects invalid tokens", () => {
-    expect(() => parseToken("")).toThrow("Token is required");
+ expect(() => parseToken("")).toThrow("Token is required");
 });
 ```
 
 ```ts
 it("rejects missing users", async () => {
-    await expect(loadUser("missing")).rejects.toThrow("Missing user");
+ await expect(loadUser("missing")).rejects.toThrow("Missing user");
 });
 ```
 

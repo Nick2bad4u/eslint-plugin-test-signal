@@ -12,7 +12,7 @@ tests can disappear from local runs and CI jobs that reuse the same command.
 
 ```ts
 it.only("handles valid input", () => {
-    expect(parseConfig("enabled")).toBe(true);
+ expect(parseConfig("enabled")).toBe(true);
 });
 ```
 
@@ -20,7 +20,7 @@ it.only("handles valid input", () => {
 
 ```ts
 it("handles valid input", () => {
-    expect(parseConfig("enabled")).toBe(true);
+ expect(parseConfig("enabled")).toBe(true);
 });
 ```
 

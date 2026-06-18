@@ -11,7 +11,11 @@ import { createRuleDocsUrl } from "../src/_internal/rule-docs-url";
 import { isTestSignalConfigReference } from "../src/_internal/test-signal-config-references";
 import testSignalPlugin from "../src/plugin";
 
-const expectedRuleTypes = new Set(["layout", "problem", "suggestion"]);
+const expectedRuleTypes = new Set([
+    "layout",
+    "problem",
+    "suggestion",
+]);
 const ruleCatalogIdPattern = /^R\d{3}$/v;
 
 const isNonEmptyString = (value: unknown): value is string =>
@@ -66,7 +70,7 @@ const getRuleRecord = (
     expect(
         isRecord(ruleModule),
         `Rule '${ruleName}' must export an object`
-    ).toBeTruthy();
+    ).toBe(true);
 
     return isRecord(ruleModule) ? ruleModule : {};
 };
@@ -77,7 +81,7 @@ const getRuleMetaRecord = (
 ): Readonly<Record<string, unknown>> => {
     const meta = ruleRecord["meta"];
 
-    expect(isRecord(meta), `Rule '${ruleName}' must define meta`).toBeTruthy();
+    expect(isRecord(meta), `Rule '${ruleName}' must define meta`).toBe(true);
 
     return isRecord(meta) ? meta : {};
 };
@@ -88,10 +92,9 @@ const getRuleDocsRecord = (
 ): Readonly<Record<string, unknown>> => {
     const docs = metaRecord["docs"];
 
-    expect(
-        isRecord(docs),
-        `Rule '${ruleName}' must define meta.docs`
-    ).toBeTruthy();
+    expect(isRecord(docs), `Rule '${ruleName}' must define meta.docs`).toBe(
+        true
+    );
 
     return isRecord(docs) ? docs : {};
 };
@@ -113,11 +116,11 @@ const assertBaseRuleMetadataContract = ({
     expect(
         isNonEmptyString(type) && expectedRuleTypes.has(type),
         `Rule '${ruleName}' has unsupported meta.type '${String(type)}'`
-    ).toBeTruthy();
+    ).toBe(true);
     expect(
         Array.isArray(schema),
         `Rule '${ruleName}' must declare a schema array`
-    ).toBeTruthy();
+    ).toBe(true);
 };
 
 const assertDocsContract = ({
@@ -135,17 +138,17 @@ const assertDocsContract = ({
     const testSignalConfigs = docsRecord["testSignalConfigs"];
     const url = docsRecord["url"];
 
-    expect(isNonEmptyString(description)).toBeTruthy();
+    expect(isNonEmptyString(description)).toBe(true);
     expect(recommended).toBeTypeOf("boolean");
     expect(requiresTypeChecking).toBeTypeOf("boolean");
     expect(
         typeof ruleId === "string" && ruleCatalogIdPattern.test(ruleId)
-    ).toBeTruthy();
+    ).toBe(true);
     expect(
         typeof ruleNumber === "number" &&
             Number.isInteger(ruleNumber) &&
             ruleNumber > 0
-    ).toBeTruthy();
+    ).toBe(true);
     expect(url).toBe(createRuleDocsUrl(ruleName));
 
     if (typeof ruleId === "string" && typeof ruleNumber === "number") {
@@ -153,8 +156,10 @@ const assertDocsContract = ({
     }
 
     expect(
-        fs.existsSync(path.join(process.cwd(), "docs", "rules", `${ruleName}.md`))
-    ).toBeTruthy();
+        fs.existsSync(
+            path.join(process.cwd(), "docs", "rules", `${ruleName}.md`)
+        )
+    ).toBe(true);
 
     const references = normalizeTestSignalConfigReferences(testSignalConfigs);
 
@@ -162,7 +167,7 @@ const assertDocsContract = ({
     expect(references).toHaveLength(new Set(references).size);
 
     for (const reference of references) {
-        expect(isTestSignalConfigReference(reference)).toBeTruthy();
+        expect(isTestSignalConfigReference(reference)).toBe(true);
     }
 
     expect(recommended).toBe(
@@ -182,7 +187,7 @@ const assertMessageContract = ({
     expect(
         isRecord(messages),
         `Rule '${ruleName}' must define a messages record`
-    ).toBeTruthy();
+    ).toBe(true);
 
     if (!isRecord(messages)) {
         return;
@@ -196,7 +201,7 @@ const assertMessageContract = ({
         expect(
             isNonEmptyString(messageTemplate),
             `Rule '${ruleName}' message '${messageId}' must be non-empty`
-        ).toBeTruthy();
+        ).toBe(true);
     }
 };
 

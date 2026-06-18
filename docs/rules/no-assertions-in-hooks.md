@@ -17,17 +17,17 @@ proved.
 
 ```ts
 beforeEach(() => {
-    expect(console.error).not.toHaveBeenCalled();
+ expect(console.error).not.toHaveBeenCalled();
 });
 
 it("renders the widget", () => {
-    renderWidget();
+ renderWidget();
 });
 ```
 
 ```ts
 afterEach(async () => {
-    await expect(closeServer()).resolves.toBeUndefined();
+ await expect(closeServer()).resolves.toBeUndefined();
 });
 ```
 
@@ -35,19 +35,19 @@ afterEach(async () => {
 
 ```ts
 beforeEach(() => {
-    vi.clearAllMocks();
+ vi.clearAllMocks();
 });
 
 it("renders the widget without console errors", () => {
-    renderWidget();
+ renderWidget();
 
-    expect(console.error).not.toHaveBeenCalled();
+ expect(console.error).not.toHaveBeenCalled();
 });
 ```
 
 ```ts
 it("closes the server cleanly", async () => {
-    await expect(closeServer()).resolves.toBeUndefined();
+ await expect(closeServer()).resolves.toBeUndefined();
 });
 ```
 

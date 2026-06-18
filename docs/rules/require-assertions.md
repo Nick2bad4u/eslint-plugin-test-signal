@@ -12,7 +12,7 @@ without checking return values, thrown errors, emitted events, or state changes.
 
 ```ts
 it("renders compact mode", () => {
-    renderWidget({ mode: "compact" });
+ renderWidget({ mode: "compact" });
 });
 ```
 
@@ -20,7 +20,7 @@ it("renders compact mode", () => {
 
 ```ts
 it("renders compact mode", () => {
-    expect(renderWidget({ mode: "compact" }).mode).toBe("compact");
+ expect(renderWidget({ mode: "compact" }).mode).toBe("compact");
 });
 ```
 

@@ -15,19 +15,19 @@ state.
 
 ```ts
 it("returns a user", () => {
-    expect(loadUser("abc")).toEqual(expect.anything());
+ expect(loadUser("abc")).toEqual(expect.anything());
 });
 ```
 
 ```ts
 it("returns a config object", () => {
-    expect(loadConfig()).toStrictEqual(expect.any(Object));
+ expect(loadConfig()).toStrictEqual(expect.any(Object));
 });
 ```
 
 ```ts
 it("returns a response subset", () => {
-    expect(fetchResponse()).toMatchObject({});
+ expect(fetchResponse()).toMatchObject({});
 });
 ```
 
@@ -35,18 +35,18 @@ it("returns a response subset", () => {
 
 ```ts
 it("returns a user", () => {
-    expect(loadUser("abc")).toEqual({
-        id: "abc",
-        name: expect.any(String),
-    });
+ expect(loadUser("abc")).toEqual({
+  id: "abc",
+  name: expect.any(String),
+ });
 });
 ```
 
 ```ts
 it("returns a config object", () => {
-    expect(loadConfig()).toMatchObject({
-        enabled: true,
-    });
+ expect(loadConfig()).toMatchObject({
+  enabled: true,
+ });
 });
 ```
 

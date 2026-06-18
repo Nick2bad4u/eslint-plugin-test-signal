@@ -13,13 +13,13 @@ also keep passing when the implementation returns an empty collection.
 
 ```ts
 it("returns items", () => {
-    expect(loadItems().length).toBeGreaterThanOrEqual(0);
+ expect(loadItems().length).toBeGreaterThanOrEqual(0);
 });
 ```
 
 ```ts
 it("returns items", () => {
-    expect(loadItems().length).not.toBeLessThan(0);
+ expect(loadItems().length).not.toBeLessThan(0);
 });
 ```
 
@@ -27,13 +27,13 @@ it("returns items", () => {
 
 ```ts
 it("returns two items", () => {
-    expect(loadItems()).toHaveLength(2);
+ expect(loadItems()).toHaveLength(2);
 });
 ```
 
 ```ts
 it("returns at least one item", () => {
-    expect(loadItems().length).toBeGreaterThan(0);
+ expect(loadItems().length).toBeGreaterThan(0);
 });
 ```
 

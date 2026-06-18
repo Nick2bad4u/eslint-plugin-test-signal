@@ -94,8 +94,9 @@ const ensureRulesRecord = (value, label) => {
             );
         }
 
-        rulesRecord[ruleName] =
-            /** @type {BenchmarkRules[string]} */ (ruleEntry);
+        rulesRecord[ruleName] = /** @type {BenchmarkRules[string]} */ (
+            ruleEntry
+        );
     }
 
     return rulesRecord;
@@ -131,7 +132,8 @@ export const testSignalRuleSets = Object.freeze({
 /**
  * Create an ESLint flat config for benchmark runs.
  *
- * @param {CreateTestSignalFlatConfigOptions} options - Options containing the ESLint rule map.
+ * @param {CreateTestSignalFlatConfigOptions} options - Options containing the
+ *   ESLint rule map.
  *
  * @returns {import("eslint").Linter.Config[]} ESLint flat config.
  */

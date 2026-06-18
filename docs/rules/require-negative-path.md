@@ -21,9 +21,9 @@ The rule treats the following as negative-path signals:
 
 ```ts
 describe("parseToken", () => {
-    it("parses valid tokens", () => {
-        expect(parseToken("abc")).toEqual({ value: "abc" });
-    });
+ it("parses valid tokens", () => {
+  expect(parseToken("abc")).toEqual({ value: "abc" });
+ });
 });
 ```
 
@@ -31,13 +31,13 @@ describe("parseToken", () => {
 
 ```ts
 describe("parseToken", () => {
-    it("parses valid tokens", () => {
-        expect(parseToken("abc")).toEqual({ value: "abc" });
-    });
+ it("parses valid tokens", () => {
+  expect(parseToken("abc")).toEqual({ value: "abc" });
+ });
 
-    it("throws for invalid tokens", () => {
-        expect(() => parseToken("")).toThrow("Invalid token");
-    });
+ it("throws for invalid tokens", () => {
+  expect(() => parseToken("")).toThrow("Invalid token");
+ });
 });
 ```
 

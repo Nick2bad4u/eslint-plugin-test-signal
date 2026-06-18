@@ -14,13 +14,13 @@ or another unintended value.
 
 ```ts
 it("returns a user", () => {
-    expect(loadUser("abc")).toBeDefined();
+ expect(loadUser("abc")).toBeDefined();
 });
 ```
 
 ```ts
 it("returns a user", () => {
-    expect(loadUser("abc")).not.toBeNull();
+ expect(loadUser("abc")).not.toBeNull();
 });
 ```
 
@@ -28,16 +28,16 @@ it("returns a user", () => {
 
 ```ts
 it("returns a user", () => {
-    expect(loadUser("abc")).toEqual({
-        enabled: true,
-        id: "abc",
-    });
+ expect(loadUser("abc")).toEqual({
+  enabled: true,
+  id: "abc",
+ });
 });
 ```
 
 ```ts
 it("omits missing users", () => {
-    expect(loadUser("missing")).toBeUndefined();
+ expect(loadUser("missing")).toBeUndefined();
 });
 ```
 

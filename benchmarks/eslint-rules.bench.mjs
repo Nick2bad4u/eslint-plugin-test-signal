@@ -17,7 +17,8 @@ import {
  *     fix: boolean;
  *     minimumMessageCount: number;
  *     rules: BenchmarkRules;
- * }>} LintScenarioOptions Scenario configuration for linting a fixture set.
+ * }>} LintScenarioOptions
+ *   Scenario configuration for linting a fixture set.
  */
 
 const standardBenchmarkOptions = Object.freeze({
@@ -28,7 +29,8 @@ const standardBenchmarkOptions = Object.freeze({
 /**
  * Count lint problems so benchmark runs assert useful signal.
  *
- * @param {readonly import("eslint").ESLint.LintResult[]} lintResults - ESLint lint results.
+ * @param {readonly import("eslint").ESLint.LintResult[]} lintResults - ESLint
+ *   lint results.
  *
  * @returns {number} Total error + warning count.
  */
@@ -42,7 +44,8 @@ const countReportedProblems = (lintResults) =>
 /**
  * Run one ESLint benchmark scenario.
  *
- * @param {LintScenarioOptions} options - Fixture patterns, rules, and expected signal limits.
+ * @param {LintScenarioOptions} options - Fixture patterns, rules, and expected
+ *   signal limits.
  *
  * @returns {Promise<number>} Problem count.
  */

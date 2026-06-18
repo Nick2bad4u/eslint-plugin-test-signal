@@ -180,6 +180,26 @@ const normalizeMarkdownTableSpacing = (markdown) =>
                 .slice(1, -1)
                 .map((cell) => cell.trim());
 
+            if (cells.every((cell) => /^:?-+:?$/v.test(cell))) {
+                return `| ${cells
+                    .map((cell) => {
+                        if (cell.startsWith(":") && cell.endsWith(":")) {
+                            return ":-:";
+                        }
+
+                        if (cell.startsWith(":")) {
+                            return ":--";
+                        }
+
+                        if (cell.endsWith(":")) {
+                            return "--:";
+                        }
+
+                        return "---";
+                    })
+                    .join(" | ")} |`;
+            }
+
             return `| ${cells.join(" | ")} |`;
         })
         .join("\n");

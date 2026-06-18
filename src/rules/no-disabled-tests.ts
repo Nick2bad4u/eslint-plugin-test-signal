@@ -11,20 +11,18 @@ type MessageId = "disabledTest";
 
 /** Rule module for `test-signal/no-disabled-tests`. */
 const noDisabledTestsRule: TSESLint.RuleModule<MessageId> = createTypedRule({
-    create(context) {
-        return {
-            CallExpression(node) {
-                if (!isDisabledTestLikeCall(node)) {
-                    return;
-                }
+    create: (context) => ({
+        CallExpression(node) {
+            if (!isDisabledTestLikeCall(node)) {
+                return;
+            }
 
-                context.report({
-                    messageId: "disabledTest",
-                    node: node.callee,
-                });
-            },
-        };
-    },
+            context.report({
+                messageId: "disabledTest",
+                node: node.callee,
+            });
+        },
+    }),
     defaultOptions: [],
     meta: {
         docs: {

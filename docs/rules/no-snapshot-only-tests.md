@@ -13,7 +13,7 @@ reviewing the semantic guarantee.
 
 ```ts
 it("renders the error panel", () => {
-    expect(renderErrorPanel({ code: "E_AUTH" })).toMatchSnapshot();
+ expect(renderErrorPanel({ code: "E_AUTH" })).toMatchSnapshot();
 });
 ```
 
@@ -21,10 +21,10 @@ it("renders the error panel", () => {
 
 ```ts
 it("renders the error panel", () => {
-    const panel = renderErrorPanel({ code: "E_AUTH" });
+ const panel = renderErrorPanel({ code: "E_AUTH" });
 
-    expect(panel.role).toBe("alert");
-    expect(panel).toMatchSnapshot();
+ expect(panel.role).toBe("alert");
+ expect(panel).toMatchSnapshot();
 });
 ```
 

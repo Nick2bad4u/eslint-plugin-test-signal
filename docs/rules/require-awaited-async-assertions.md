@@ -13,7 +13,7 @@ the assertion would fail on the next microtask.
 
 ```ts
 it("rejects invalid tokens", () => {
-    expect(readToken("bad")).rejects.toThrow("Invalid token");
+ expect(readToken("bad")).rejects.toThrow("Invalid token");
 });
 ```
 
@@ -21,7 +21,7 @@ it("rejects invalid tokens", () => {
 
 ```ts
 it("rejects invalid tokens", async () => {
-    await expect(readToken("bad")).rejects.toThrow("Invalid token");
+ await expect(readToken("bad")).rejects.toThrow("Invalid token");
 });
 ```
 
@@ -29,7 +29,7 @@ it("rejects invalid tokens", async () => {
 
 ```ts
 it("resolves valid tokens", () => {
-    return expect(readToken("ok")).resolves.toEqual({ value: "ok" });
+ return expect(readToken("ok")).resolves.toEqual({ value: "ok" });
 });
 ```
 

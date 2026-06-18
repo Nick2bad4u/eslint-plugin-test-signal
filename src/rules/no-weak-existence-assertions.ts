@@ -22,65 +22,58 @@ const negatedAbsenceMatcherNames = new Set(["toBeNull", "toBeUndefined"]);
 /** Rule module for `test-signal/no-weak-existence-assertions`. */
 const noWeakExistenceAssertionsRule: TSESLint.RuleModule<MessageId> =
     createTypedRule({
-        create(context) {
-            return {
-                CallExpression(node) {
-                    const testCall = getTestCall(node);
+        create: (context) => ({
+            CallExpression(node) {
+                const testCall = getTestCall(node);
 
-                    if (!isDefined(testCall)) {
-                        return;
-                    }
+                if (!isDefined(testCall)) {
+                    return;
+                }
 
-                    visitDescendantsOutsideNestedFunctions(
-                        testCall.callback.body,
-                        (descendant) => {
-                            if (
-                                descendant.type !==
-                                AST_NODE_TYPES.CallExpression
-                            ) {
-                                return;
-                            }
-
-                            const assertion =
-                                getAssertionMatcherCall(descendant);
-
-                            if (!isDefined(assertion)) {
-                                return;
-                            }
-
-                            const hasNot = assertionChainHasProperty(
-                                assertion.expectCall,
-                                notPropertyNames
-                            );
-                            const isWeakDefinedAssertion =
-                                assertion.matcherName === "toBeDefined" &&
-                                !hasNot;
-                            const isWeakNegatedAbsenceAssertion =
-                                hasNot &&
-                                setHas(
-                                    negatedAbsenceMatcherNames,
-                                    assertion.matcherName
-                                );
-
-                            if (
-                                !isWeakDefinedAssertion &&
-                                !isWeakNegatedAbsenceAssertion
-                            ) {
-                                return;
-                            }
-
-                            context.report({
-                                data: {
-                                    matcherName: assertion.matcherName,
-                                },
-                                messageId: "weakExistenceAssertion",
-                                node: assertion.matcherCall,
-                            });
+                visitDescendantsOutsideNestedFunctions(
+                    testCall.callback.body,
+                    (descendant) => {
+                        if (descendant.type !== AST_NODE_TYPES.CallExpression) {
+                            return;
                         }
-                    );
-                },
-            };
-        },
+
+                        const assertion = getAssertionMatcherCall(descendant);
+
+                        if (!isDefined(assertion)) {
+                            return;
+                        }
+
+                        const hasNot = assertionChainHasProperty(
+                            assertion.expectCall,
+                            notPropertyNames
+                        );
+                        const isWeakDefinedAssertion =
+                            assertion.matcherName === "toBeDefined" && !hasNot;
+                        const isWeakNegatedAbsenceAssertion =
+                            hasNot &&
+                            setHas(
+                                negatedAbsenceMatcherNames,
+                                assertion.matcherName
+                            );
+
+                        if (
+                            !isWeakDefinedAssertion &&
+                            !isWeakNegatedAbsenceAssertion
+                        ) {
+                            return;
+                        }
+
+                        context.report({
+                            data: {
+                                matcherName: assertion.matcherName,
+                            },
+                            messageId: "weakExistenceAssertion",
+                            node: assertion.matcherCall,
+                        });
+                    }
+                );
+            },
+        }),
         defaultOptions: [],
         meta: {
             docs: {

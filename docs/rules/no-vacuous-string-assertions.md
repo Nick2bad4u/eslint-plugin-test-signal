@@ -13,19 +13,19 @@ label, token, error message, or format.
 
 ```ts
 it("renders content", () => {
-    expect(renderedText()).toContain("");
+ expect(renderedText()).toContain("");
 });
 ```
 
 ```ts
 it("renders content", () => {
-    expect(renderedText()).toMatch(/.*/);
+ expect(renderedText()).toMatch(/.*/);
 });
 ```
 
 ```ts
 it("renders content", () => {
-    expect(renderedText()).toEqual(expect.stringContaining(""));
+ expect(renderedText()).toEqual(expect.stringContaining(""));
 });
 ```
 
@@ -33,13 +33,13 @@ it("renders content", () => {
 
 ```ts
 it("renders content", () => {
-    expect(renderedText()).toContain("Saved");
+ expect(renderedText()).toContain("Saved");
 });
 ```
 
 ```ts
 it("renders content", () => {
-    expect(renderedText()).toMatch(/^Saved \d+ items$/);
+ expect(renderedText()).toMatch(/^Saved \d+ items$/);
 });
 ```
 

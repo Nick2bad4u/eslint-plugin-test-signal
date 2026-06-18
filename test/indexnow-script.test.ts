@@ -189,7 +189,8 @@ describe("indexnow script helpers", () => {
                 sourcePath: "docs/docusaurus/site-docs/developer/index.md",
             },
             {
-                permalink: "/eslint-plugin-test-signal/docs/rules/getting-started",
+                permalink:
+                    "/eslint-plugin-test-signal/docs/rules/getting-started",
                 sourcePath: "docs/rules/getting-started.md",
             },
         ]);
@@ -234,7 +235,8 @@ describe("indexnow script helpers", () => {
                             "docs/docusaurus/site-docs/developer/index.md",
                     },
                 ],
-                siteUrl: "https://nick2bad4u.github.io/eslint-plugin-test-signal/",
+                siteUrl:
+                    "https://nick2bad4u.github.io/eslint-plugin-test-signal/",
             })
         ).toStrictEqual([
             "https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/getting-started",
@@ -249,7 +251,7 @@ describe("indexnow script helpers", () => {
                 403,
                 '{"errorCode":"SiteVerificationNotCompleted","message":"Site Verification is not completed."}'
             )
-        ).toBeTruthy();
+        ).toBe(true);
     });
 
     it("does not mark unrelated IndexNow failures as retryable", () => {
@@ -259,9 +261,9 @@ describe("indexnow script helpers", () => {
                 403,
                 '{"errorCode":"Forbidden","message":"Some other failure."}'
             )
-        ).toBeFalsy();
+        ).toBe(false);
         expect(
             isIndexNowVerificationPendingResponse(422, "unprocessable entity")
-        ).toBeFalsy();
+        ).toBe(false);
     });
 });

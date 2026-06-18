@@ -57,7 +57,9 @@ describe("test-signal rule docs", () => {
 
             expect(url).toBe(createRuleDocsUrl(ruleId));
             expect(docs?.description).toBeTypeOf("string");
-            expect(fs.existsSync(path.join(docsDir, `${ruleId}.md`))).toBeTruthy();
+            expect(fs.existsSync(path.join(docsDir, `${ruleId}.md`))).toBe(
+                true
+            );
         }
     });
 

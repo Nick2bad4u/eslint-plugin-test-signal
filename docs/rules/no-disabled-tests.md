@@ -12,7 +12,7 @@ but the scenario does not actually run.
 
 ```ts
 it.skip("rejects expired tokens", () => {
-    expect(() => verifyToken(expiredToken)).toThrow("expired");
+ expect(() => verifyToken(expiredToken)).toThrow("expired");
 });
 ```
 
@@ -20,7 +20,7 @@ it.skip("rejects expired tokens", () => {
 
 ```ts
 it("rejects expired tokens", () => {
-    expect(() => verifyToken(expiredToken)).toThrow("expired");
+ expect(() => verifyToken(expiredToken)).toThrow("expired");
 });
 ```
 

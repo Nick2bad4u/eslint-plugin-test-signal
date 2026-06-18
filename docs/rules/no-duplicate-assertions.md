@@ -12,10 +12,10 @@ different field, expected value, or post-action state.
 
 ```ts
 it("returns user metadata", () => {
-    const user = loadUser();
+ const user = loadUser();
 
-    expect(user.id).toBe("user-1");
-    expect(user.id).toBe("user-1");
+ expect(user.id).toBe("user-1");
+ expect(user.id).toBe("user-1");
 });
 ```
 
@@ -23,18 +23,18 @@ it("returns user metadata", () => {
 
 ```ts
 it("returns user metadata", () => {
-    const user = loadUser();
+ const user = loadUser();
 
-    expect(user.id).toBe("user-1");
-    expect(user.name).toBe("Ada");
+ expect(user.id).toBe("user-1");
+ expect(user.name).toBe("Ada");
 });
 ```
 
 ```ts
 it("checks state transitions", () => {
-    expect(store.getState()).toBe("idle");
-    store.load();
-    expect(store.getState()).toBe("loaded");
+ expect(store.getState()).toBe("idle");
+ store.load();
+ expect(store.getState()).toBe("loaded");
 });
 ```
 

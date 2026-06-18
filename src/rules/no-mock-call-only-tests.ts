@@ -15,32 +15,30 @@ type MessageId = "mockCallOnlyTest";
 /** Rule module for `test-signal/no-mock-call-only-tests`. */
 const noMockCallOnlyTestsRule: TSESLint.RuleModule<MessageId> = createTypedRule(
     {
-        create(context) {
-            return {
-                CallExpression(node) {
-                    const testCall = getTestCall(node);
+        create: (context) => ({
+            CallExpression(node) {
+                const testCall = getTestCall(node);
 
-                    if (!isDefined(testCall)) {
-                        return;
-                    }
+                if (!isDefined(testCall)) {
+                    return;
+                }
 
-                    const assertions = summarizeAssertions(testCall.callback);
+                const assertions = summarizeAssertions(testCall.callback);
 
-                    if (
-                        assertions.assertionCount === 0 ||
-                        assertions.mockCallAssertionCount !==
-                            assertions.assertionCount
-                    ) {
-                        return;
-                    }
+                if (
+                    assertions.assertionCount === 0 ||
+                    assertions.mockCallAssertionCount !==
+                        assertions.assertionCount
+                ) {
+                    return;
+                }
 
-                    context.report({
-                        messageId: "mockCallOnlyTest",
-                        node: testCall.node,
-                    });
-                },
-            };
-        },
+                context.report({
+                    messageId: "mockCallOnlyTest",
+                    node: testCall.node,
+                });
+            },
+        }),
         defaultOptions: [],
         meta: {
             docs: {

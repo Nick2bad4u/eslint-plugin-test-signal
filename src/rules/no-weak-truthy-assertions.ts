@@ -20,43 +20,38 @@ const weakTruthyMatcherNames = new Set(["toBeFalsy", "toBeTruthy"]);
 /** Rule module for `test-signal/no-weak-truthy-assertions`. */
 const noWeakTruthyAssertionsRule: TSESLint.RuleModule<MessageId> =
     createTypedRule({
-        create(context) {
-            return {
-                CallExpression(node) {
-                    const testCall = getTestCall(node);
+        create: (context) => ({
+            CallExpression(node) {
+                const testCall = getTestCall(node);
 
-                    if (!isDefined(testCall)) {
+                if (!isDefined(testCall)) {
+                    return;
+                }
+
+                visitDescendants(testCall.callback.body, (descendant) => {
+                    if (descendant.type !== AST_NODE_TYPES.CallExpression) {
                         return;
                     }
 
-                    visitDescendants(testCall.callback.body, (descendant) => {
-                        if (descendant.type !== AST_NODE_TYPES.CallExpression) {
-                            return;
-                        }
+                    const matcherCall = getAssertionMatcherCall(descendant);
 
-                        const matcherCall = getAssertionMatcherCall(descendant);
+                    if (
+                        !isDefined(matcherCall) ||
+                        !setHas(weakTruthyMatcherNames, matcherCall.matcherName)
+                    ) {
+                        return;
+                    }
 
-                        if (
-                            !isDefined(matcherCall) ||
-                            !setHas(
-                                weakTruthyMatcherNames,
-                                matcherCall.matcherName
-                            )
-                        ) {
-                            return;
-                        }
-
-                        context.report({
-                            data: {
-                                matcherName: matcherCall.matcherName,
-                            },
-                            messageId: "weakTruthyAssertion",
-                            node: matcherCall.matcherCall,
-                        });
+                    context.report({
+                        data: {
+                            matcherName: matcherCall.matcherName,
+                        },
+                        messageId: "weakTruthyAssertion",
+                        node: matcherCall.matcherCall,
                     });
-                },
-            };
-        },
+                });
+            },
+        }),
         defaultOptions: [],
         meta: {
             docs: {

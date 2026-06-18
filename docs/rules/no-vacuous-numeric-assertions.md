@@ -13,13 +13,13 @@ unreachable bound instead of the finite threshold the code is expected to meet.
 
 ```ts
 it("returns a count", () => {
-    expect(loadCount()).toBeLessThan(Infinity);
+ expect(loadCount()).toBeLessThan(Infinity);
 });
 ```
 
 ```ts
 it("returns a count", () => {
-    expect(loadCount()).toBeGreaterThan(-Infinity);
+ expect(loadCount()).toBeGreaterThan(-Infinity);
 });
 ```
 
@@ -27,13 +27,13 @@ it("returns a count", () => {
 
 ```ts
 it("returns a bounded count", () => {
-    expect(loadCount()).toBeLessThan(10);
+ expect(loadCount()).toBeLessThan(10);
 });
 ```
 
 ```ts
 it("returns at least one item", () => {
-    expect(loadCount()).toBeGreaterThanOrEqual(1);
+ expect(loadCount()).toBeGreaterThanOrEqual(1);
 });
 ```
 

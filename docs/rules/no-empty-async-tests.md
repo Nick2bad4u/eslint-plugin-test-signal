@@ -12,7 +12,7 @@ remove the final `expect(...)` call but leave the async wrapper behind.
 
 ```ts
 it("loads the account", async () => {
-    await loadAccount("user-1");
+ await loadAccount("user-1");
 });
 ```
 
@@ -20,9 +20,9 @@ it("loads the account", async () => {
 
 ```ts
 it("loads the account", async () => {
-    await expect(loadAccount("user-1")).resolves.toMatchObject({
-        id: "user-1",
-    });
+ await expect(loadAccount("user-1")).resolves.toMatchObject({
+  id: "user-1",
+ });
 });
 ```
 

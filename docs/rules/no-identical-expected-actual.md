@@ -12,15 +12,15 @@ looks specific, but the expected value is not independent from the actual value.
 
 ```ts
 it("returns the saved user", () => {
-    const user = saveUser({ id: "abc" });
+ const user = saveUser({ id: "abc" });
 
-    expect(user).toEqual(user);
+ expect(user).toEqual(user);
 });
 ```
 
 ```ts
 it("returns the current state", () => {
-    expect(store.state.current).toStrictEqual(store.state.current);
+ expect(store.state.current).toStrictEqual(store.state.current);
 });
 ```
 
@@ -28,17 +28,17 @@ it("returns the current state", () => {
 
 ```ts
 it("returns the saved user", () => {
-    expect(saveUser({ id: "abc" })).toEqual({
-        id: "abc",
-    });
+ expect(saveUser({ id: "abc" })).toEqual({
+  id: "abc",
+ });
 });
 ```
 
 ```ts
 it("returns the current state", () => {
-    const expectedState = createExpectedState();
+ const expectedState = createExpectedState();
 
-    expect(store.state.current).toStrictEqual(expectedState);
+ expect(store.state.current).toStrictEqual(expectedState);
 });
 ```
 

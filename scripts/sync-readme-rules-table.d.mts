@@ -1,12 +1,16 @@
 export type ReadmeRuleModule = Readonly<{
-    meta?: {
-        docs?: {
-            testSignalConfigs?: readonly string[] | string;
-            url?: string;
-        } | undefined;
-        fixable?: string | undefined;
-        hasSuggestions?: boolean | undefined;
-    } | undefined;
+    meta?:
+        | {
+              docs?:
+                  | {
+                        testSignalConfigs?: readonly string[] | string;
+                        url?: string;
+                    }
+                  | undefined;
+              fixable?: string | undefined;
+              hasSuggestions?: boolean | undefined;
+          }
+        | undefined;
 }>;
 
 export type ReadmeRulesMap = Readonly<Record<string, unknown>>;

@@ -434,19 +434,19 @@ export const isExpectLikeCall = (node: TSESTree.CallExpression): boolean =>
 export const containsExpectCallOutsideNestedFunctions = (
     node: TSESTree.Node
 ): boolean => {
-    let containsExpectCall = false;
+    let isContainsExpectCall = false;
 
     visitDescendantsOutsideNestedFunctions(node, (descendant) => {
         if (
-            !containsExpectCall &&
+            !isContainsExpectCall &&
             descendant.type === AST_NODE_TYPES.CallExpression &&
             isExpectLikeCall(descendant)
         ) {
-            containsExpectCall = true;
+            isContainsExpectCall = true;
         }
     });
 
-    return containsExpectCall;
+    return isContainsExpectCall;
 };
 
 const findExpectCallInAssertionChain = (

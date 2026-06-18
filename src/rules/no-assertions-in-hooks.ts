@@ -76,28 +76,26 @@ const reportHookAssertions = (
 /** Rule module for `test-signal/no-assertions-in-hooks`. */
 const noAssertionsInHooksRule: TSESLint.RuleModule<MessageId> = createTypedRule(
     {
-        create(context) {
-            return {
-                CallExpression(node) {
-                    const hookName = getHookName(node.callee);
+        create: (context) => ({
+            CallExpression(node) {
+                const hookName = getHookName(node.callee);
 
-                    if (!isDefined(hookName)) {
-                        return;
-                    }
+                if (!isDefined(hookName)) {
+                    return;
+                }
 
-                    const callback = getHookCallback(node);
+                const callback = getHookCallback(node);
 
-                    if (
-                        !isDefined(callback) ||
-                        !containsExpectCallOutsideNestedFunctions(callback.body)
-                    ) {
-                        return;
-                    }
+                if (
+                    !isDefined(callback) ||
+                    !containsExpectCallOutsideNestedFunctions(callback.body)
+                ) {
+                    return;
+                }
 
-                    reportHookAssertions(context, hookName, callback);
-                },
-            };
-        },
+                reportHookAssertions(context, hookName, callback);
+            },
+        }),
         defaultOptions: [],
         meta: {
             docs: {

@@ -15,8 +15,8 @@ suite.
   - `suggest` = suggestions available
   - `-` = report only
 
-| Rule | Fix |
-| --- | :-: |
-| [`no-empty-async-tests`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-empty-async-tests) | - |
-| [`no-focused-tests`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-focused-tests) | - |
-| [`require-awaited-async-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/require-awaited-async-assertions) | - |
+| Rule                                                                                                                                     | Fix |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | :-: |
+| [`no-empty-async-tests`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-empty-async-tests)                         |  -  |
+| [`no-focused-tests`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/no-focused-tests)                                 |  -  |
+| [`require-awaited-async-assertions`](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/require-awaited-async-assertions) |  -  |

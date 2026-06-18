@@ -15,26 +15,24 @@ type MessageId = "unawaitedAsyncAssertion";
 /** Rule module for `test-signal/require-awaited-async-assertions`. */
 const requireAwaitedAsyncAssertionsRule: TSESLint.RuleModule<MessageId> =
     createTypedRule({
-        create(context) {
-            return {
-                CallExpression(node) {
-                    const testCall = getTestCall(node);
+        create: (context) => ({
+            CallExpression(node) {
+                const testCall = getTestCall(node);
 
-                    if (!isDefined(testCall)) {
-                        return;
-                    }
+                if (!isDefined(testCall)) {
+                    return;
+                }
 
-                    const assertions = summarizeAssertions(testCall.callback);
+                const assertions = summarizeAssertions(testCall.callback);
 
-                    for (const assertionNode of assertions.unawaitedAsyncAssertionNodes) {
-                        context.report({
-                            messageId: "unawaitedAsyncAssertion",
-                            node: assertionNode,
-                        });
-                    }
-                },
-            };
-        },
+                for (const assertionNode of assertions.unawaitedAsyncAssertionNodes) {
+                    context.report({
+                        messageId: "unawaitedAsyncAssertion",
+                        node: assertionNode,
+                    });
+                }
+            },
+        }),
         defaultOptions: [],
         meta: {
             docs: {

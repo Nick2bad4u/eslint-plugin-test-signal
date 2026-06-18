@@ -1,22 +1,22 @@
+import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
+
 /**
  * @packageDocumentation
  * Dynamic sidebar generation for plugin rule documentation sections.
  */
 import { readdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
-
-type SidebarDocItem = {
+interface SidebarDocItem {
     readonly className?: string;
     readonly id: string;
     readonly label: string;
     readonly type: "doc";
-};
+}
 
-const sidebarDirectoryPath = dirname(fileURLToPath(import.meta.url));
-const rulesDirectoryPath = join(sidebarDirectoryPath, "..", "rules");
+const sidebarDirectoryPath = path.dirname(fileURLToPath(import.meta.url));
+const rulesDirectoryPath = path.join(sidebarDirectoryPath, "..", "rules");
 
 const isMarkdownFile = (fileName: string): boolean => fileName.endsWith(".md");
 
@@ -27,7 +27,7 @@ const allRuleDocIds = readdirSync(rulesDirectoryPath, {
 })
     .filter((entry) => entry.isFile() && isMarkdownFile(entry.name))
     .map((entry) => toRuleDocId(entry.name))
-    .sort((left, right) => left.localeCompare(right));
+    .toSorted((left, right) => left.localeCompare(right));
 
 const ruleDocIds = allRuleDocIds.filter(
     (ruleDocId) =>
@@ -60,14 +60,6 @@ const sidebars = {
             customProps: {
                 badge: "guides",
             },
-            label: "Adoption",
-            link: {
-                description:
-                    "Rollout guidance for weak-test signal enforcement.",
-                title: "Adoption",
-                type: "generated-index",
-            },
-            type: "category",
             items: [
                 {
                     id: "guides/adoption-checklist",
@@ -95,6 +87,14 @@ const sidebars = {
                     type: "doc",
                 },
             ],
+            label: "Adoption",
+            link: {
+                description:
+                    "Rollout guidance for weak-test signal enforcement.",
+                title: "Adoption",
+                type: "generated-index",
+            },
+            type: "category",
         },
         {
             className: "sb-cat-presets",
@@ -102,12 +102,6 @@ const sidebars = {
             customProps: {
                 badge: "presets",
             },
-            label: "Presets",
-            link: {
-                id: "presets/index",
-                type: "doc",
-            },
-            type: "category",
             items: [
                 {
                     className: "sb-preset-minimal",
@@ -146,6 +140,12 @@ const sidebars = {
                     type: "doc",
                 },
             ],
+            label: "Presets",
+            link: {
+                id: "presets/index",
+                type: "doc",
+            },
+            type: "category",
         },
         {
             className: "sb-cat-rules",
@@ -153,6 +153,7 @@ const sidebars = {
             customProps: {
                 badge: "rules",
             },
+            items: ruleItems,
             label: "Rules",
             link: {
                 description:
@@ -162,7 +163,6 @@ const sidebars = {
                 type: "generated-index",
             },
             type: "category",
-            items: ruleItems,
         },
     ],
 } satisfies SidebarsConfig;

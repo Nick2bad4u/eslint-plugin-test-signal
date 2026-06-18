@@ -134,7 +134,8 @@ const parsePathArgument = (key) => {
 /**
  * Count lint problems across results.
  *
- * @param {readonly import("eslint").ESLint.LintResult[]} lintResults - ESLint lint results.
+ * @param {readonly import("eslint").ESLint.LintResult[]} lintResults - ESLint
+ *   lint results.
  *
  * @returns {number} Total error + warning count.
  */
@@ -146,7 +147,8 @@ const countReportedProblems = (lintResults) =>
     );
 
 /**
- * Sum numeric measurements without relying on runtime APIs missing from the local JS type model.
+ * Sum numeric measurements without relying on runtime APIs missing from the
+ * local JS type model.
  *
  * @param {readonly number[]} values - Measurements to sum.
  *
@@ -199,7 +201,8 @@ const median = (values) => {
  *
  * @param {BenchmarkScenario} scenario - Scenario definition.
  *
- * @returns {Promise<{ messageCount: number; wallClockMilliseconds: number }>} Measurement.
+ * @returns {Promise<{ messageCount: number; wallClockMilliseconds: number }>}
+ *   Measurement.
  */
 const runScenarioOnce = async (scenario) => {
     const eslint = new ESLint({
@@ -279,16 +282,18 @@ const runScenario = async (scenario, iterations, warmupIterations) => {
     };
 };
 
-const iterations = parsePositiveIntegerArgument("iterations", defaultIterations);
+const iterations = parsePositiveIntegerArgument(
+    "iterations",
+    defaultIterations
+);
 const warmupIterations = parsePositiveIntegerArgument(
     "warmup",
     defaultWarmupIterations
 );
 const comparePath = parsePathArgument("compare");
-const outputPath = parsePathArgument("output") ?? path.resolve(
-    repositoryRoot,
-    "coverage/benchmarks/eslint-stats.json"
-);
+const outputPath =
+    parsePathArgument("output") ??
+    path.resolve(repositoryRoot, "coverage/benchmarks/eslint-stats.json");
 
 /** @type {ScenarioResult[]} */
 const scenarioResults = [];
@@ -328,9 +333,7 @@ if (comparePath !== undefined) {
         : undefined;
     /** @type {readonly UnknownRecord[]} */
     const previousScenarios = Array.isArray(previousScenariosValue)
-        ? previousScenariosValue.filter((scenario) =>
-              isUnknownRecord(scenario)
-          )
+        ? previousScenariosValue.filter((scenario) => isUnknownRecord(scenario))
         : [];
     const previousMeanByName = new Map(
         previousScenarios

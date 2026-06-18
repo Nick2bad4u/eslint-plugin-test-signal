@@ -192,7 +192,9 @@ const patchRuleTesterRunWithGeneratedCaseNames = <
     return tester;
 };
 
-export const applySharedRuleTesterRunBehavior = <TRuleTester extends RuleTester>(
+export const applySharedRuleTesterRunBehavior = <
+    TRuleTester extends RuleTester,
+>(
     tester: TRuleTester
 ): TRuleTester => patchRuleTesterRunWithGeneratedCaseNames(tester);
 

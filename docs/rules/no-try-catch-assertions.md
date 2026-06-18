@@ -12,11 +12,11 @@ and the test can pass without checking the failure path.
 
 ```ts
 it("rejects invalid payloads", async () => {
-    try {
-        await submitPayload({});
-    } catch (error) {
-        expect(error).toBeInstanceOf(ValidationError);
-    }
+ try {
+  await submitPayload({});
+ } catch (error) {
+  expect(error).toBeInstanceOf(ValidationError);
+ }
 });
 ```
 
@@ -24,21 +24,21 @@ it("rejects invalid payloads", async () => {
 
 ```ts
 it("rejects invalid payloads", async () => {
-    await expect(submitPayload({})).rejects.toThrow(ValidationError);
+ await expect(submitPayload({})).rejects.toThrow(ValidationError);
 });
 ```
 
 ```ts
 it("keeps validation details", async () => {
-    let caught: unknown;
+ let caught: unknown;
 
-    try {
-        await submitPayload({});
-    } catch (error) {
-        caught = error;
-    }
+ try {
+  await submitPayload({});
+ } catch (error) {
+  caught = error;
+ }
 
-    expect(caught).toMatchObject({ code: "invalid_payload" });
+ expect(caught).toMatchObject({ code: "invalid_payload" });
 });
 ```
 

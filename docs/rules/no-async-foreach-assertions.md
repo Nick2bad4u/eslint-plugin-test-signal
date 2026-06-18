@@ -16,21 +16,21 @@ Use a `for...of` loop when each check should run sequentially, or use
 
 ```ts
 it("checks every user", () => {
-    users.forEach(async (user) => {
-        await expect(loadProfile(user.id)).resolves.toMatchObject({
-            id: user.id,
-        });
-    });
+ users.forEach(async (user) => {
+  await expect(loadProfile(user.id)).resolves.toMatchObject({
+   id: user.id,
+  });
+ });
 });
 ```
 
 ```ts
 test("checks every token", async () => {
-    tokens.forEach(async (token) => {
-        const result = await validateToken(token);
+ tokens.forEach(async (token) => {
+  const result = await validateToken(token);
 
-        expect(result.valid).toBe(true);
-    });
+  expect(result.valid).toBe(true);
+ });
 });
 ```
 
@@ -38,23 +38,23 @@ test("checks every token", async () => {
 
 ```ts
 it("checks every user", async () => {
-    for (const user of users) {
-        await expect(loadProfile(user.id)).resolves.toMatchObject({
-            id: user.id,
-        });
-    }
+ for (const user of users) {
+  await expect(loadProfile(user.id)).resolves.toMatchObject({
+   id: user.id,
+  });
+ }
 });
 ```
 
 ```ts
 it("checks every user", async () => {
-    await Promise.all(
-        users.map(async (user) => {
-            await expect(loadProfile(user.id)).resolves.toMatchObject({
-                id: user.id,
-            });
-        })
-    );
+ await Promise.all(
+  users.map(async (user) => {
+   await expect(loadProfile(user.id)).resolves.toMatchObject({
+    id: user.id,
+   });
+  })
+ );
 });
 ```
 

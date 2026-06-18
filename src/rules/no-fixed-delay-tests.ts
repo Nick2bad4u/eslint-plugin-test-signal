@@ -92,62 +92,60 @@ const promiseExecutorContainsFixedDelay = (
         return false;
     }
 
-    let containsFixedDelay = false;
+    let isContainsFixedDelay = false;
 
     visitDescendants(executor.body, (descendant) => {
         if (
-            !containsFixedDelay &&
+            !isContainsFixedDelay &&
             descendant.type === AST_NODE_TYPES.CallExpression &&
             isSetTimeoutCallWithDelay(descendant)
         ) {
-            containsFixedDelay = true;
+            isContainsFixedDelay = true;
         }
     });
 
-    return containsFixedDelay;
+    return isContainsFixedDelay;
 };
 
 /** Rule module for `test-signal/no-fixed-delay-tests`. */
 const noFixedDelayTestsRule: TSESLint.RuleModule<MessageId> = createTypedRule({
-    create(context) {
-        return {
-            CallExpression(node) {
-                const testCall = getTestCall(node);
+    create: (context) => ({
+        CallExpression(node) {
+            const testCall = getTestCall(node);
 
-                if (!isDefined(testCall)) {
-                    return;
-                }
+            if (!isDefined(testCall)) {
+                return;
+            }
 
-                visitDescendantsOutsideNestedFunctions(
-                    testCall.callback.body,
-                    (descendant) => {
-                        if (
-                            descendant.type === AST_NODE_TYPES.CallExpression &&
-                            (isFixedDelayHelperCall(descendant) ||
-                                isSetTimeoutCallWithDelay(descendant))
-                        ) {
-                            context.report({
-                                messageId: "fixedDelay",
-                                node: descendant,
-                            });
-                            return;
-                        }
-
-                        if (
-                            descendant.type === AST_NODE_TYPES.NewExpression &&
-                            isPromiseConstructor(descendant) &&
-                            promiseExecutorContainsFixedDelay(descendant)
-                        ) {
-                            context.report({
-                                messageId: "fixedDelay",
-                                node: descendant,
-                            });
-                        }
+            visitDescendantsOutsideNestedFunctions(
+                testCall.callback.body,
+                (descendant) => {
+                    if (
+                        descendant.type === AST_NODE_TYPES.CallExpression &&
+                        (isFixedDelayHelperCall(descendant) ||
+                            isSetTimeoutCallWithDelay(descendant))
+                    ) {
+                        context.report({
+                            messageId: "fixedDelay",
+                            node: descendant,
+                        });
+                        return;
                     }
-                );
-            },
-        };
-    },
+
+                    if (
+                        descendant.type === AST_NODE_TYPES.NewExpression &&
+                        isPromiseConstructor(descendant) &&
+                        promiseExecutorContainsFixedDelay(descendant)
+                    ) {
+                        context.report({
+                            messageId: "fixedDelay",
+                            node: descendant,
+                        });
+                    }
+                }
+            );
+        },
+    }),
     defaultOptions: [],
     meta: {
         docs: {

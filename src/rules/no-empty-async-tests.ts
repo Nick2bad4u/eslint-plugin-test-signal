@@ -13,33 +13,31 @@ type MessageId = "emptyAsyncTest";
 
 /** Rule module for `test-signal/no-empty-async-tests`. */
 const noEmptyAsyncTestsRule: TSESLint.RuleModule<MessageId> = createTypedRule({
-    create(context) {
-        return {
-            CallExpression(node) {
-                const testCall = getTestCall(node);
-                const callback = testCall?.callback;
+    create: (context) => ({
+        CallExpression(node) {
+            const testCall = getTestCall(node);
+            const callback = testCall?.callback;
 
-                if (
-                    !isDefined(callback) ||
-                    !callback.async ||
-                    callback.body.type !== AST_NODE_TYPES.BlockStatement
-                ) {
-                    return;
-                }
+            if (
+                !isDefined(callback) ||
+                !callback.async ||
+                callback.body.type !== AST_NODE_TYPES.BlockStatement
+            ) {
+                return;
+            }
 
-                const assertions = summarizeAssertions(callback);
+            const assertions = summarizeAssertions(callback);
 
-                if (assertions.assertionCount > 0) {
-                    return;
-                }
+            if (assertions.assertionCount > 0) {
+                return;
+            }
 
-                context.report({
-                    messageId: "emptyAsyncTest",
-                    node: callback,
-                });
-            },
-        };
-    },
+            context.report({
+                messageId: "emptyAsyncTest",
+                node: callback,
+            });
+        },
+    }),
     defaultOptions: [],
     meta: {
         docs: {

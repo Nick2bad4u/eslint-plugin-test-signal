@@ -58,47 +58,43 @@ const isForEachCall = (node: TSESTree.CallExpression): boolean =>
 /** Rule module for `test-signal/no-async-foreach-assertions`. */
 const noAsyncForeachAssertionsRule: TSESLint.RuleModule<MessageId> =
     createTypedRule({
-        create(context) {
-            return {
-                CallExpression(node) {
-                    const testCall = getTestCall(node);
+        create: (context) => ({
+            CallExpression(node) {
+                const testCall = getTestCall(node);
 
-                    if (!isDefined(testCall)) {
-                        return;
-                    }
+                if (!isDefined(testCall)) {
+                    return;
+                }
 
-                    visitDescendantsOutsideNestedFunctions(
-                        testCall.callback.body,
-                        (descendant) => {
-                            if (
-                                descendant.type !==
-                                    AST_NODE_TYPES.CallExpression ||
-                                !isForEachCall(descendant)
-                            ) {
-                                return;
-                            }
-
-                            const callback =
-                                getAsyncCallbackArgument(descendant);
-
-                            if (
-                                !isDefined(callback) ||
-                                !containsExpectCallOutsideNestedFunctions(
-                                    callback.body
-                                )
-                            ) {
-                                return;
-                            }
-
-                            context.report({
-                                messageId: "asyncForeachAssertion",
-                                node: callback,
-                            });
+                visitDescendantsOutsideNestedFunctions(
+                    testCall.callback.body,
+                    (descendant) => {
+                        if (
+                            descendant.type !== AST_NODE_TYPES.CallExpression ||
+                            !isForEachCall(descendant)
+                        ) {
+                            return;
                         }
-                    );
-                },
-            };
-        },
+
+                        const callback = getAsyncCallbackArgument(descendant);
+
+                        if (
+                            !isDefined(callback) ||
+                            !containsExpectCallOutsideNestedFunctions(
+                                callback.body
+                            )
+                        ) {
+                            return;
+                        }
+
+                        context.report({
+                            messageId: "asyncForeachAssertion",
+                            node: callback,
+                        });
+                    }
+                );
+            },
+        }),
         defaultOptions: [],
         meta: {
             docs: {

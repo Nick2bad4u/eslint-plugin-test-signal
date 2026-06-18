@@ -14,28 +14,26 @@ type MessageId = "missingAssertion";
 
 /** Rule module for `test-signal/require-assertions`. */
 const requireAssertionsRule: TSESLint.RuleModule<MessageId> = createTypedRule({
-    create(context) {
-        return {
-            CallExpression(node) {
-                const testCall = getTestCall(node);
+    create: (context) => ({
+        CallExpression(node) {
+            const testCall = getTestCall(node);
 
-                if (!isDefined(testCall)) {
-                    return;
-                }
+            if (!isDefined(testCall)) {
+                return;
+            }
 
-                const assertions = summarizeAssertions(testCall.callback);
+            const assertions = summarizeAssertions(testCall.callback);
 
-                if (assertions.assertionCount > 0) {
-                    return;
-                }
+            if (assertions.assertionCount > 0) {
+                return;
+            }
 
-                context.report({
-                    messageId: "missingAssertion",
-                    node: testCall.callback,
-                });
-            },
-        };
-    },
+            context.report({
+                messageId: "missingAssertion",
+                node: testCall.callback,
+            });
+        },
+    }),
     defaultOptions: [],
     meta: {
         docs: {

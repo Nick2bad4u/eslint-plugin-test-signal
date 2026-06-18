@@ -14,13 +14,13 @@ keys while still being non-empty.
 
 ```ts
 it("returns config", () => {
-    expect(Object.keys(loadConfig()).length).toBeGreaterThan(0);
+ expect(Object.keys(loadConfig()).length).toBeGreaterThan(0);
 });
 ```
 
 ```ts
 it("returns config", () => {
-    expect(Object.keys(loadConfig()).length).not.toBe(0);
+ expect(Object.keys(loadConfig()).length).not.toBe(0);
 });
 ```
 
@@ -28,13 +28,13 @@ it("returns config", () => {
 
 ```ts
 it("returns config", () => {
-    expect(loadConfig()).toMatchObject({ mode: "production" });
+ expect(loadConfig()).toMatchObject({ mode: "production" });
 });
 ```
 
 ```ts
 it("returns config keys", () => {
-    expect(Object.keys(loadConfig())).toEqual(["mode", "region"]);
+ expect(Object.keys(loadConfig())).toEqual(["mode", "region"]);
 });
 ```
 

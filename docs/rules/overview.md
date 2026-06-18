@@ -42,21 +42,21 @@ checker work because the targeted patterns are visible directly in the test AST.
 
 ## Rule reference
 
-| Rule | Purpose |
-| --- | --- |
-| [`no-empty-async-tests`](./no-empty-async-tests.md) | Flags async tests without assertions. |
-| [`require-awaited-async-assertions`](./require-awaited-async-assertions.md) | Flags floating `.resolves` and `.rejects` assertions. |
-| [`no-snapshot-only-tests`](./no-snapshot-only-tests.md) | Flags tests whose only assertions are snapshots. |
-| [`no-mock-call-only-tests`](./no-mock-call-only-tests.md) | Flags tests whose only assertions inspect mock calls. |
-| [`no-constant-assertions`](./no-constant-assertions.md) | Flags assertions whose subject is a static constant. |
-| [`no-weak-existence-assertions`](./no-weak-existence-assertions.md) | Flags broad existence assertions such as `toBeDefined()`. |
-| [`no-identical-expected-actual`](./no-identical-expected-actual.md) | Flags assertions that compare a value to itself. |
-| [`no-weak-asymmetric-assertions`](./no-weak-asymmetric-assertions.md) | Flags vacuous whole-value asymmetric assertions. |
-| [`no-tautological-length-assertions`](./no-tautological-length-assertions.md) | Flags length assertions that only prove length is non-negative. |
-| [`no-fixed-delay-tests`](./no-fixed-delay-tests.md) | Flags fixed real-time delays in executable tests. |
-| [`no-synthetic-promise-assertions`](./no-synthetic-promise-assertions.md) | Flags `.resolves` and `.rejects` assertions against synthetic Promise values. |
-| [`no-vacuous-string-assertions`](./no-vacuous-string-assertions.md) | Flags string assertions with expected values that match anything. |
-| [`no-vacuous-numeric-assertions`](./no-vacuous-numeric-assertions.md) | Flags numeric bound assertions with infinite thresholds. |
-| [`no-broad-object-key-count-assertions`](./no-broad-object-key-count-assertions.md) | Flags object key-count assertions that only prove an object is non-empty. |
-| [`no-duplicate-assertions`](./no-duplicate-assertions.md) | Flags repeated identical assertion chains in the same test. |
-| [`require-negative-path`](./require-negative-path.md) | Flags test scopes without negative-path coverage signals. |
+| Rule                                                                                | Purpose                                                                       |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [`no-empty-async-tests`](./no-empty-async-tests.md)                                 | Flags async tests without assertions.                                         |
+| [`require-awaited-async-assertions`](./require-awaited-async-assertions.md)         | Flags floating `.resolves` and `.rejects` assertions.                         |
+| [`no-snapshot-only-tests`](./no-snapshot-only-tests.md)                             | Flags tests whose only assertions are snapshots.                              |
+| [`no-mock-call-only-tests`](./no-mock-call-only-tests.md)                           | Flags tests whose only assertions inspect mock calls.                         |
+| [`no-constant-assertions`](./no-constant-assertions.md)                             | Flags assertions whose subject is a static constant.                          |
+| [`no-weak-existence-assertions`](./no-weak-existence-assertions.md)                 | Flags broad existence assertions such as `toBeDefined()`.                     |
+| [`no-identical-expected-actual`](./no-identical-expected-actual.md)                 | Flags assertions that compare a value to itself.                              |
+| [`no-weak-asymmetric-assertions`](./no-weak-asymmetric-assertions.md)               | Flags vacuous whole-value asymmetric assertions.                              |
+| [`no-tautological-length-assertions`](./no-tautological-length-assertions.md)       | Flags length assertions that only prove length is non-negative.               |
+| [`no-fixed-delay-tests`](./no-fixed-delay-tests.md)                                 | Flags fixed real-time delays in executable tests.                             |
+| [`no-synthetic-promise-assertions`](./no-synthetic-promise-assertions.md)           | Flags `.resolves` and `.rejects` assertions against synthetic Promise values. |
+| [`no-vacuous-string-assertions`](./no-vacuous-string-assertions.md)                 | Flags string assertions with expected values that match anything.             |
+| [`no-vacuous-numeric-assertions`](./no-vacuous-numeric-assertions.md)               | Flags numeric bound assertions with infinite thresholds.                      |
+| [`no-broad-object-key-count-assertions`](./no-broad-object-key-count-assertions.md) | Flags object key-count assertions that only prove an object is non-empty.     |
+| [`no-duplicate-assertions`](./no-duplicate-assertions.md)                           | Flags repeated identical assertion chains in the same test.                   |
+| [`require-negative-path`](./require-negative-path.md)                               | Flags test scopes without negative-path coverage signals.                     |

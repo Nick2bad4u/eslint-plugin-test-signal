@@ -12,11 +12,11 @@ body still completes successfully unless another deterministic assertion fails.
 
 ```ts
 it("handles optional metadata", () => {
-    const result = readResult();
+ const result = readResult();
 
-    if (result.metadata !== undefined) {
-        expect(result.metadata.source).toBe("cache");
-    }
+ if (result.metadata !== undefined) {
+  expect(result.metadata.source).toBe("cache");
+ }
 });
 ```
 
@@ -24,17 +24,17 @@ it("handles optional metadata", () => {
 
 ```ts
 it("handles optional metadata", () => {
-    const result = readResult();
+ const result = readResult();
 
-    expect(result.metadata).toEqual({ source: "cache" });
+ expect(result.metadata).toEqual({ source: "cache" });
 });
 ```
 
 ```ts
 it("handles missing metadata", () => {
-    const result = readResultWithoutMetadata();
+ const result = readResultWithoutMetadata();
 
-    expect(result.metadata).toBeUndefined();
+ expect(result.metadata).toBeUndefined();
 });
 ```
 

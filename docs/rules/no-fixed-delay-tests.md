@@ -13,19 +13,19 @@ logic.
 
 ```ts
 it("waits for background work", async () => {
-    await sleep(100);
+ await sleep(100);
 
-    expect(loadStatus()).toBe("ready");
+ expect(loadStatus()).toBe("ready");
 });
 ```
 
 ```ts
 it("waits for a callback", async () => {
-    await new Promise((resolve) => {
-        setTimeout(resolve, 50);
-    });
+ await new Promise((resolve) => {
+  setTimeout(resolve, 50);
+ });
 
-    expect(loadStatus()).toBe("ready");
+ expect(loadStatus()).toBe("ready");
 });
 ```
 
@@ -33,17 +33,17 @@ it("waits for a callback", async () => {
 
 ```ts
 it("waits for background work", async () => {
-    await waitFor(() => expect(loadStatus()).toBe("ready"));
+ await waitFor(() => expect(loadStatus()).toBe("ready"));
 });
 ```
 
 ```ts
 it("advances fake timers", () => {
-    vi.useFakeTimers();
-    scheduleRetry();
-    vi.advanceTimersByTime(100);
+ vi.useFakeTimers();
+ scheduleRetry();
+ vi.advanceTimersByTime(100);
 
-    expect(retryCount()).toBe(1);
+ expect(retryCount()).toBe(1);
 });
 ```
 

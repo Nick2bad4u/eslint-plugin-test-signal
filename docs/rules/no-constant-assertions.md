@@ -14,16 +14,16 @@ but never connected to the real subject.
 
 ```ts
 it("passes without exercising code", () => {
-    expect(true).toBe(true);
+ expect(true).toBe(true);
 });
 ```
 
 ```ts
 it("checks only a static fixture", () => {
-    expect({ enabled: true, id: "abc" }).toEqual({
-        enabled: true,
-        id: "abc",
-    });
+ expect({ enabled: true, id: "abc" }).toEqual({
+  enabled: true,
+  id: "abc",
+ });
 });
 ```
 
@@ -31,16 +31,16 @@ it("checks only a static fixture", () => {
 
 ```ts
 it("returns an enabled user", () => {
-    expect(loadUser("abc")).toEqual({
-        enabled: true,
-        id: "abc",
-    });
+ expect(loadUser("abc")).toEqual({
+  enabled: true,
+  id: "abc",
+ });
 });
 ```
 
 ```ts
 it("returns an admin role", () => {
-    expect(createRoles()).toContain("admin");
+ expect(createRoles()).toContain("admin");
 });
 ```
 

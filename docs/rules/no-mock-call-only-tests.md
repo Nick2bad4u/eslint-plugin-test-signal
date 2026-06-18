@@ -12,11 +12,11 @@ pushes tests toward at least one externally visible outcome assertion.
 
 ```ts
 it("sends a welcome email", () => {
-    const sendEmail = vi.fn();
+ const sendEmail = vi.fn();
 
-    registerUser({ email: "user@example.com", sendEmail });
+ registerUser({ email: "user@example.com", sendEmail });
 
-    expect(sendEmail).toHaveBeenCalledTimes(1);
+ expect(sendEmail).toHaveBeenCalledTimes(1);
 });
 ```
 
@@ -24,12 +24,12 @@ it("sends a welcome email", () => {
 
 ```ts
 it("sends a welcome email", () => {
-    const sendEmail = vi.fn();
+ const sendEmail = vi.fn();
 
-    const result = registerUser({ email: "user@example.com", sendEmail });
+ const result = registerUser({ email: "user@example.com", sendEmail });
 
-    expect(result.status).toBe("created");
-    expect(sendEmail).toHaveBeenCalledTimes(1);
+ expect(result.status).toBe("created");
+ expect(sendEmail).toHaveBeenCalledTimes(1);
 });
 ```
 

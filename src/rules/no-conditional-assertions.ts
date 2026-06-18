@@ -83,35 +83,33 @@ const isInsideConditionalBranch = (
 /** Rule module for `test-signal/no-conditional-assertions`. */
 const noConditionalAssertionsRule: TSESLint.RuleModule<MessageId> =
     createTypedRule({
-        create(context) {
-            return {
-                CallExpression(node) {
-                    const testCall = getTestCall(node);
+        create: (context) => ({
+            CallExpression(node) {
+                const testCall = getTestCall(node);
 
-                    if (!isDefined(testCall)) {
+                if (!isDefined(testCall)) {
+                    return;
+                }
+
+                visitDescendants(testCall.callback.body, (descendant) => {
+                    if (
+                        descendant.type !== AST_NODE_TYPES.CallExpression ||
+                        !isExpectCall(descendant) ||
+                        !isInsideConditionalBranch(
+                            descendant,
+                            testCall.callback.body
+                        )
+                    ) {
                         return;
                     }
 
-                    visitDescendants(testCall.callback.body, (descendant) => {
-                        if (
-                            descendant.type !== AST_NODE_TYPES.CallExpression ||
-                            !isExpectCall(descendant) ||
-                            !isInsideConditionalBranch(
-                                descendant,
-                                testCall.callback.body
-                            )
-                        ) {
-                            return;
-                        }
-
-                        context.report({
-                            messageId: "conditionalAssertion",
-                            node: descendant,
-                        });
+                    context.report({
+                        messageId: "conditionalAssertion",
+                        node: descendant,
                     });
-                },
-            };
-        },
+                });
+            },
+        }),
         defaultOptions: [],
         meta: {
             docs: {

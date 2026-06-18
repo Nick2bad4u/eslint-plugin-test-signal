@@ -56,9 +56,7 @@ describe("readme rules table synchronization", () => {
         const rules = testSignalPlugin.rules as unknown as Parameters<
             typeof generateReadmeRulesSectionFromRules
         >[0];
-        const expectedRulesSection = generateReadmeRulesSectionFromRules(
-            rules
-        );
+        const expectedRulesSection = generateReadmeRulesSectionFromRules(rules);
 
         expect(normalizeRulesSectionMarkdown(readmeRulesSection)).toBe(
             normalizeRulesSectionMarkdown(expectedRulesSection)

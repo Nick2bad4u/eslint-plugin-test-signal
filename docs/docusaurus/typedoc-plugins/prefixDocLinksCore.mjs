@@ -310,7 +310,8 @@ function prefixInlineLinkPayload(payload) {
 }
 
 /**
- * Returns a rewritten inline-link close fragment starting at `closeBracketIndex`.
+ * Returns a rewritten inline-link close fragment starting at
+ * `closeBracketIndex`.
  *
  * @param {string} line
  * @param {number} closeBracketIndex

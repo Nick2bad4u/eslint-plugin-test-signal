@@ -3,6 +3,11 @@
     "compilerOptions": {
         "ignoreDeprecations": "6.0",
         "isolatedDeclarations": false,
+        "lib": [
+            "DOM",
+            "DOM.Iterable",
+            "ES2023"
+        ],
         "module": "ESNext",
         "moduleResolution": "bundler",
         "noEmit": true,

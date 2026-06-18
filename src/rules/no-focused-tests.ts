@@ -11,20 +11,18 @@ type MessageId = "focusedTest";
 
 /** Rule module for `test-signal/no-focused-tests`. */
 const noFocusedTestsRule: TSESLint.RuleModule<MessageId> = createTypedRule({
-    create(context) {
-        return {
-            CallExpression(node) {
-                if (!isFocusedTestLikeCall(node)) {
-                    return;
-                }
+    create: (context) => ({
+        CallExpression(node) {
+            if (!isFocusedTestLikeCall(node)) {
+                return;
+            }
 
-                context.report({
-                    messageId: "focusedTest",
-                    node: node.callee,
-                });
-            },
-        };
-    },
+            context.report({
+                messageId: "focusedTest",
+                node: node.callee,
+            });
+        },
+    }),
     defaultOptions: [],
     meta: {
         docs: {

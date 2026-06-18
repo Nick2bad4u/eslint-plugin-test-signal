@@ -24,12 +24,6 @@ const sidebars = {
         {
             className: "sb-cat-developer",
             collapsed: true,
-            label: "Developer",
-            link: {
-                id: "developer/index",
-                type: "doc",
-            },
-            type: "category",
             items: [
                 {
                     id: "developer/index",
@@ -39,12 +33,6 @@ const sidebars = {
                 {
                     className: "sb-cat-api-overview",
                     collapsed: true,
-                    label: "API Reference",
-                    link: {
-                        id: "developer/api/index",
-                        type: "doc",
-                    },
-                    type: "category",
                     items: [
                         {
                             id: "developer/api/plugin/index",
@@ -67,18 +55,16 @@ const sidebars = {
                             type: "doc",
                         },
                     ],
+                    label: "API Reference",
+                    link: {
+                        id: "developer/api/index",
+                        type: "doc",
+                    },
+                    type: "category",
                 },
                 {
                     className: "sb-cat-developer-adr",
                     collapsed: true,
-                    label: "ADRs",
-                    link: {
-                        description:
-                            "Architecture decisions for the test-signal rule catalog and weak-test heuristics.",
-                        title: "Architecture Decision Records",
-                        type: "generated-index",
-                    },
-                    type: "category",
                     items: [
                         {
                             id: "developer/adr/rule-catalog-and-static-doc-metadata",
@@ -91,18 +77,18 @@ const sidebars = {
                             type: "doc",
                         },
                     ],
+                    label: "ADRs",
+                    link: {
+                        description:
+                            "Architecture decisions for the test-signal rule catalog and weak-test heuristics.",
+                        title: "Architecture Decision Records",
+                        type: "generated-index",
+                    },
+                    type: "category",
                 },
                 {
                     className: "sb-cat-dev-charts",
                     collapsed: true,
-                    label: "Charts",
-                    link: {
-                        description:
-                            "Visual maps for rule coverage and release validation flows.",
-                        title: "Developer Charts",
-                        type: "generated-index",
-                    },
-                    type: "category",
                     items: [
                         {
                             id: "developer/charts/rule-signal-map",
@@ -115,12 +101,18 @@ const sidebars = {
                             type: "doc",
                         },
                     ],
+                    label: "Charts",
+                    link: {
+                        description:
+                            "Visual maps for rule coverage and release validation flows.",
+                        title: "Developer Charts",
+                        type: "generated-index",
+                    },
+                    type: "category",
                 },
                 {
                     className: "sb-cat-dev-links",
                     collapsed: true,
-                    label: "Project Links",
-                    type: "category",
                     items: [
                         {
                             href: repositoryUrl,
@@ -148,8 +140,16 @@ const sidebars = {
                             type: "link",
                         },
                     ],
+                    label: "Project Links",
+                    type: "category",
                 },
             ],
+            label: "Developer",
+            link: {
+                id: "developer/index",
+                type: "doc",
+            },
+            type: "category",
         },
     ],
 } satisfies SidebarsConfig;

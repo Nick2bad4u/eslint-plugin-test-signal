@@ -13,13 +13,13 @@ starts returning the wrong truthy object or the wrong falsy value.
 
 ```ts
 it("returns a user", () => {
-    expect(loadUser("abc")).toBeTruthy();
+ expect(loadUser("abc")).toBeTruthy();
 });
 ```
 
 ```ts
 it("omits deleted users", () => {
-    expect(loadUser("deleted")).toBeFalsy();
+ expect(loadUser("deleted")).toBeFalsy();
 });
 ```
 
@@ -27,16 +27,16 @@ it("omits deleted users", () => {
 
 ```ts
 it("returns a user", () => {
-    expect(loadUser("abc")).toEqual({
-        enabled: true,
-        id: "abc",
-    });
+ expect(loadUser("abc")).toEqual({
+  enabled: true,
+  id: "abc",
+ });
 });
 ```
 
 ```ts
 it("omits deleted users", () => {
-    expect(loadUser("deleted")).toBeNull();
+ expect(loadUser("deleted")).toBeNull();
 });
 ```
 
