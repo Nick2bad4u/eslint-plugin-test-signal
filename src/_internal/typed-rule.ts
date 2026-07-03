@@ -20,8 +20,7 @@ export interface TestSignalRuleDocs {
     ruleId?: string;
     ruleNumber?: number;
     testSignalConfigs?:
-        | readonly TestSignalConfigReference[]
-        | TestSignalConfigReference;
+        readonly TestSignalConfigReference[] | TestSignalConfigReference;
 }
 
 const createRuleCreator: typeof ESLintUtils.RuleCreator =

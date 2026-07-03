@@ -48,8 +48,7 @@ type TestSignalRuleDocsContract = Readonly<{
     ruleId: string;
     ruleNumber: number;
     testSignalConfigs:
-        | readonly TestSignalConfigReference[]
-        | TestSignalConfigReference;
+        readonly TestSignalConfigReference[] | TestSignalConfigReference;
     url: string;
 }>;
 

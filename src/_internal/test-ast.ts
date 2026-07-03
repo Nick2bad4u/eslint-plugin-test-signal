@@ -122,8 +122,7 @@ export interface TestCall {
 
 /** Minimal callback node type accepted by test analysis helpers. */
 export type TestCallback =
-    | TSESTree.ArrowFunctionExpression
-    | TSESTree.FunctionExpression;
+    TSESTree.ArrowFunctionExpression | TSESTree.FunctionExpression;
 
 type FunctionLikeNode =
     | TSESTree.ArrowFunctionExpression
@@ -347,14 +346,16 @@ const visitNode = (
     const nodeRecord = node as unknown as Readonly<UnknownRecord>;
 
     for (const [key, value] of objectEntries(nodeRecord)) {
-        if (!isTraversalMetadataKey(key)) {
-            const childNodes = Array.isArray(value)
-                ? value.filter(isAstNode)
-                : getAstChildNodesFromTraversalValue(value);
+        if (isTraversalMetadataKey(key)) {
+            continue;
+        }
 
-            for (const childNode of childNodes) {
-                visitNode(childNode, visitor, seen);
-            }
+        const childNodes = Array.isArray(value)
+            ? value.filter(isAstNode)
+            : getAstChildNodesFromTraversalValue(value);
+
+        for (const childNode of childNodes) {
+            visitNode(childNode, visitor, seen);
         }
     }
 };
