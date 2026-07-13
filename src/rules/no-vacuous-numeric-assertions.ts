@@ -24,7 +24,10 @@ const notPropertyNames = new Set(["not"]);
 
 const getInfiniteSign = (
     node: TSESTree.CallExpressionArgument | undefined
-): -1 | 1 | undefined => {
+):
+    | -1
+    | 1
+    | undefined => {
     if (node?.type === AST_NODE_TYPES.Identifier && node.name === "Infinity") {
         return 1;
     }
@@ -43,7 +46,10 @@ const getInfiniteSign = (
 
 const isVacuousInfiniteComparison = (
     matcherName: string,
-    infiniteSign: -1 | 1 | undefined,
+    infiniteSign:
+        | -1
+        | 1
+        | undefined,
     hasNot: boolean
 ): boolean => {
     if (!isDefined(infiniteSign)) {
