@@ -6,13 +6,13 @@ const workflowsDirectory = join(process.cwd(), ".github", "workflows");
 const workflowNames = (await readdir(workflowsDirectory))
     .filter((name) => /\.(?:yaml|yml)$/v.test(name))
     .toSorted();
-const lint = await createLinter();
 const findings = [];
 
 for (const workflowName of workflowNames) {
     const workflowPath = join(workflowsDirectory, workflowName);
     const displayPath = posix.join(".github", "workflows", workflowName);
     const source = await readFile(workflowPath, "utf8");
+    const lint = await createLinter();
 
     findings.push(...lint(source, displayPath));
 }

@@ -1,5 +1,5 @@
-import { readFile } from "node:fs/promises";
 import { posix, win32 } from "node:path";
+import { text } from "node:stream/consumers";
 import { pathToFileURL } from "node:url";
 
 const isRecord = (value) =>
@@ -58,14 +58,7 @@ export const resolveNpmPackFilename = (metadata) => {
 };
 
 const runCli = async () => {
-    const metadataPath = process.argv[2];
-    if (typeof metadataPath !== "string" || process.argv.length !== 3) {
-        throw new Error(
-            "Usage: node scripts/resolve-npm-pack-filename.mjs <metadata-path>"
-        );
-    }
-
-    const metadata = JSON.parse(await readFile(metadataPath, "utf8"));
+    const metadata = JSON.parse(await text(process.stdin));
     process.stdout.write(resolveNpmPackFilename(metadata));
 };
 
@@ -75,9 +68,8 @@ if (
 ) {
     try {
         await runCli();
-    } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(`Unable to resolve the npm pack filename: ${message}`);
+    } catch {
+        process.stderr.write("Unable to resolve the npm pack filename.\n");
         process.exitCode = 1;
     }
 }
