@@ -110,7 +110,7 @@ export const testSignalRuleCatalogEntries: readonly TestSignalRuleCatalogEntry[]
 /**
  * Fast lookup map for rule catalog metadata by rule name.
  */
-export const testSignalRuleCatalogByRuleName: Readonly<
+const testSignalRuleCatalogByRuleName: Readonly<
     Partial<Record<TestSignalRuleNamePattern, TestSignalRuleCatalogEntry>>
 > = objectFromEntries(
     testSignalRuleCatalogEntries.map((entry) => [entry.ruleName, entry])
@@ -146,46 +146,4 @@ export const getRuleCatalogEntryForRuleName = (
     }
 
     return catalogEntry;
-};
-
-/**
- * Resolve stable catalog metadata by rule id.
- */
-export const testSignalRuleCatalogByRuleId: ReadonlyMap<
-    TestSignalRuleCatalogId,
-    TestSignalRuleCatalogEntry
-> = new Map(testSignalRuleCatalogEntries.map((entry) => [entry.ruleId, entry]));
-
-/**
- * Resolve stable catalog metadata for a catalog id.
- */
-export const getRuleCatalogEntryForRuleId = (
-    ruleId: TestSignalRuleCatalogId
-): TestSignalRuleCatalogEntry | undefined =>
-    testSignalRuleCatalogByRuleId.get(ruleId);
-
-/**
- * Validate that catalog IDs are unique and sequential.
- */
-export const validateRuleCatalogIntegrity = (): boolean => {
-    const seenRuleIds = new Set<TestSignalRuleCatalogId>();
-
-    for (const [index, entry] of testSignalRuleCatalogEntries.entries()) {
-        if (setHas(seenRuleIds, entry.ruleId)) {
-            return false;
-        }
-
-        seenRuleIds.add(entry.ruleId);
-
-        const expectedRuleNumber = index + 1;
-        if (entry.ruleNumber !== expectedRuleNumber) {
-            return false;
-        }
-
-        if (entry.ruleId !== toRuleCatalogId(expectedRuleNumber)) {
-            return false;
-        }
-    }
-
-    return true;
 };

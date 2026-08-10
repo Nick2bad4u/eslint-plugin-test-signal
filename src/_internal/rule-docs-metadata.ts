@@ -63,12 +63,6 @@ const normalizeConfigReferences = (
     const references: TestSignalConfigReference[] = [];
 
     for (const candidate of candidates) {
-        if (!isTestSignalConfigReference(candidate)) {
-            throw new TypeError(
-                `Rule '${ruleName}' has invalid docs.testSignalConfigs reference '${String(candidate)}'.`
-            );
-        }
-
         if (!arrayIncludes(references, candidate)) {
             references.push(candidate);
         }
@@ -133,7 +127,7 @@ const getRuleDocsContract = (
         );
     }
 
-    if (typeof url !== "string" || url !== createRuleDocsUrl(ruleName)) {
+    if (url !== createRuleDocsUrl(ruleName)) {
         throw new TypeError(
             `Rule '${ruleName}' must declare docs.url as '${createRuleDocsUrl(ruleName)}'.`
         );

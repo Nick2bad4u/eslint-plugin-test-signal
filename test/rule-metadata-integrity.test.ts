@@ -109,6 +109,7 @@ const assertBaseRuleMetadataContract = ({
     ruleRecord: Readonly<Record<string, unknown>>;
 }>): void => {
     const type = metaRecord["type"];
+    const languages = metaRecord["languages"];
     const schema = metaRecord["schema"];
     const ruleNameProperty = ruleRecord["name"];
 
@@ -117,6 +118,7 @@ const assertBaseRuleMetadataContract = ({
         isNonEmptyString(type) && expectedRuleTypes.has(type),
         `Rule '${ruleName}' has unsupported meta.type '${String(type)}'`
     ).toBe(true);
+    expect(languages).toStrictEqual(["js/js"]);
     expect(
         Array.isArray(schema),
         `Rule '${ruleName}' must declare a schema array`

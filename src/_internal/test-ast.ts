@@ -415,7 +415,7 @@ export const visitDescendantsOutsideNestedFunctions = (
  * Check whether a call expression is the root `expect(...)` call in an
  * assertion chain.
  */
-export const isExpectCall = (node: TSESTree.CallExpression): boolean =>
+const isExpectCall = (node: TSESTree.CallExpression): boolean =>
     node.callee.type === AST_NODE_TYPES.Identifier &&
     node.callee.name === "expect";
 
@@ -488,10 +488,10 @@ export const getAssertionMatcherCall = (
     const matcherName = getPropertyName(node.callee.property);
 
     if (
-        !isDefined(matcherName) ||
         matcherName === "not" ||
         matcherName === "resolves" ||
-        matcherName === "rejects"
+        matcherName === "rejects" ||
+        !isDefined(matcherName)
     ) {
         return undefined;
     }
@@ -526,10 +526,10 @@ const getAssertionMethodName = (
             const propertyName = getPropertyName(parent.property);
 
             if (
-                isDefined(propertyName) &&
                 propertyName !== "not" &&
                 propertyName !== "resolves" &&
-                propertyName !== "rejects"
+                propertyName !== "rejects" &&
+                isDefined(propertyName)
             ) {
                 return propertyName;
             }
@@ -660,7 +660,7 @@ export const summarizeAssertions = (
     let snapshotAssertionCount = 0;
     const unawaitedAsyncAssertionNodes: TSESTree.CallExpression[] = [];
 
-    visitDescendants(callback.body, (node) => {
+    visitDescendantsOutsideNestedFunctions(callback.body, (node) => {
         if (
             node.type !== AST_NODE_TYPES.CallExpression ||
             !isExpectCall(node)

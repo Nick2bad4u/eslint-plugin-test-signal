@@ -98,9 +98,9 @@ const noIdenticalExpectedActualRule: TSESLint.RuleModule<MessageId> =
                             );
 
                             if (
+                                actualText !== expectedText ||
                                 !isDefined(actualText) ||
-                                !isDefined(expectedText) ||
-                                actualText !== expectedText
+                                !isDefined(expectedText)
                             ) {
                                 return;
                             }

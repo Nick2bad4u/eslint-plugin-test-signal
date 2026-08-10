@@ -31,6 +31,7 @@ type TestSignalRuleCreator = ReturnType<
 >;
 
 const ruleCreator = createRuleCreator<TestSignalRuleDocs>(createRuleDocsUrl);
+const javascriptRuleLanguages = ["js/js"] as const;
 
 /**
  * Rule-creator wrapper used by all plugin rules.
@@ -77,6 +78,7 @@ export const createTypedRule: TestSignalRuleCreator = (ruleDefinition) => {
         meta: {
             ...createdRule.meta,
             docs: docsWithCatalog,
+            languages: javascriptRuleLanguages,
         },
         name: ruleDefinition.name,
     };

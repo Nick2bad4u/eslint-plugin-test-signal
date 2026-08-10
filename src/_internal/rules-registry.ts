@@ -73,5 +73,3 @@ const testSignalRuleRegistry: Readonly<
 export const testSignalRules: Readonly<
     Record<TestSignalRuleNamePattern, RuleWithDocs>
 > = testSignalRuleRegistry;
-
-export default testSignalRules;
