@@ -2,6 +2,9 @@
 const processEnvironment = process.env;
 const { CI = "" } = processEnvironment;
 const isCI = CI.toLowerCase() === "true";
+const hasDashboardApiKey =
+    // eslint-disable-next-line @typescript-eslint/dot-notation -- Environment keys come from an index signature and must use bracket access under strict JS type checking.
+    (processEnvironment["STRYKER_DASHBOARD_API_KEY"] ?? "").trim().length > 0;
 
 /** @type {import("@stryker-mutator/api/core").PartialStrykerOptions} */
 const config = {
@@ -60,7 +63,7 @@ const config = {
         "clear-text",
         "html",
         "json",
-        "dashboard",
+        ...(isCI && hasDashboardApiKey ? ["dashboard"] : []),
         "progress",
     ],
     symlinkNodeModules: true,

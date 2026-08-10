@@ -12,7 +12,7 @@
 
 import { readdir, readFile, stat } from "node:fs/promises";
 import { dirname, extname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import pc from "picocolors";
 
 const argv = process.argv.slice(2);
@@ -65,7 +65,11 @@ const IGNORED_DIRECTORIES = new Set([
     ".vite",
     "coverage",
     ".stryker-tmp",
+    "temp",
 ]);
+
+export const isIgnoredDirectoryName = (entryName) =>
+    IGNORED_DIRECTORIES.has(entryName);
 
 const EXTERNAL_PROTOCOLS = [
     "http:",
@@ -216,7 +220,7 @@ async function collectMarkdownFiles(startDirectory) {
         const entries = await readdir(current, { withFileTypes: true });
         for (const entry of entries) {
             const entryName = entry.name;
-            if (IGNORED_DIRECTORIES.has(entryName)) continue;
+            if (isIgnoredDirectoryName(entryName)) continue;
             const entryPath = join(current, entryName);
             if (entry.isDirectory()) {
                 stack.push(entryPath);
@@ -564,12 +568,19 @@ async function main() {
     console.log(pc.gray(`Elapsed: ${(elapsedMs / 1000).toFixed(2)}s`));
 }
 
-try {
-    await main();
-} catch (error) {
-    console.error(
-        pc.red("Documentation link check failed due to an unexpected error.")
-    );
-    console.error(error);
-    process.exit(1);
+if (
+    typeof process.argv[1] === "string" &&
+    import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+    try {
+        await main();
+    } catch (error) {
+        console.error(
+            pc.red(
+                "Documentation link check failed due to an unexpected error."
+            )
+        );
+        console.error(error);
+        process.exitCode = 1;
+    }
 }

@@ -33,6 +33,8 @@ const config = [
             "test-signal": plugin,
         },
         rules: {
+            // The dedicated circular-dependency gate must fail; the shared preset reports cycles as warnings.
+            "import-x/no-cycle": "error",
             ...localTestSignalRules,
         },
     },
@@ -43,6 +45,7 @@ const config = [
                 AbortController: "readonly",
                 clearTimeout: "readonly",
                 document: "readonly",
+                HTMLAnchorElement: "readonly",
                 HTMLElement: "readonly",
                 location: "readonly",
                 MutationObserver: "readonly",
@@ -77,6 +80,8 @@ const config = [
         name: "Docusaurus Client Enhancements",
         rules: {
             "@typescript-eslint/no-dynamic-delete": "off",
+            // Browser enhancement callbacks intentionally receive and mutate live DOM nodes.
+            "@typescript-eslint/prefer-readonly-parameter-types": "off",
             "listeners/no-missing-remove-event-listener": "off",
             "unicorn/no-break-in-nested-loop": "off",
             "unicorn/no-global-object-property-assignment": "off",
@@ -121,7 +126,12 @@ const config = [
         ],
         name: "Plugin Rule Implementation Compatibility",
         rules: {
+            // The createTypedRule wrapper stamps the canonical js/js language centrally.
+            // Static rule analysis cannot follow that wrapper.
+            "eslint-plugin/require-meta-languages": "off",
             "import-x/max-dependencies": "off",
+            // ESLint requires AST selector keys such as CallExpression, which intentionally use PascalCase names.
+            "sonarjs/function-name": "off",
             "unicorn/consistent-boolean-name": "off",
             "unicorn/no-declarations-before-early-exit": "off",
             "unicorn/prefer-includes-over-repeated-comparisons": "off",

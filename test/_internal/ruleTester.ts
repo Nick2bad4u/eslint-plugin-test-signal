@@ -61,15 +61,15 @@ const runTimedRuleTesterCase = ({
 };
 
 assertRuleTesterHook(afterAll, "afterAll");
-RuleTester.afterAll = (...arguments_: UnknownArray) => {
+RuleTester.afterAll = (...args: UnknownArray) => {
     Reflect.apply(afterAll as (...args: UnknownArray) => unknown, undefined, [
-        ...arguments_,
+        ...args,
     ]);
 };
 assertRuleTesterHook(describe, "describe");
-RuleTester.describe = (...arguments_: UnknownArray) => {
+RuleTester.describe = (...args: UnknownArray) => {
     Reflect.apply(describe as (...args: UnknownArray) => unknown, undefined, [
-        ...arguments_,
+        ...args,
     ]);
 };
 assertRuleTesterHook(it, "it");
@@ -192,14 +192,9 @@ const patchRuleTesterRunWithGeneratedCaseNames = <
     return tester;
 };
 
-export const applySharedRuleTesterRunBehavior = <
-    TRuleTester extends RuleTester,
->(
+const applySharedRuleTesterRunBehavior = <TRuleTester extends RuleTester>(
     tester: TRuleTester
 ): TRuleTester => patchRuleTesterRunWithGeneratedCaseNames(tester);
-
-export const repoPath = (...segments: readonly string[]): string =>
-    path.join(process.cwd(), ...segments);
 
 export const createRuleTester = (): RuleTester =>
     applySharedRuleTesterRunBehavior(
