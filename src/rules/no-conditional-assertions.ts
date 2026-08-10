@@ -41,7 +41,12 @@ const isConditionalBranch = (
     }
 
     if (parent.type === AST_NODE_TYPES.IfStatement) {
-        return parent.consequent === node || parent.alternate === node;
+        const branches: readonly TSESTree.Node[] =
+            parent.alternate === null
+                ? [parent.consequent]
+                : [parent.consequent, parent.alternate];
+
+        return arrayIncludes(branches, node);
     }
 
     if (parent.type === AST_NODE_TYPES.LogicalExpression) {

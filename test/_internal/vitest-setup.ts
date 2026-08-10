@@ -9,8 +9,6 @@ import { resolvedFastCheckRunCount } from "./fast-check";
 
 type RuleCreateFunction = (...args: readonly unknown[]) => unknown;
 
-export const __vitestSetupModuleMarker = true;
-
 fc.configureGlobal({
     numRuns: resolvedFastCheckRunCount,
 });

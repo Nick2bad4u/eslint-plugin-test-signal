@@ -1,4 +1,4 @@
-export declare const __testThirdPartyModulesMarker: unique symbol;
+export {};
 
 type EslintPluginModule = Readonly<Record<string, unknown>>;
 type RemarkPluginModule = (...arguments_: readonly unknown[]) => unknown;

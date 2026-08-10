@@ -7,8 +7,8 @@ in JavaScript and TypeScript test suites.
 
 ## Prerequisites
 
-- Node.js `>=22.0.0` (see `package.json#engines`)
-- npm `>=11`
+- Node.js `^22.22.2 || ^24.15.0 || >=26.0.0` for development
+- npm `12.0.2` (see `package.json#packageManager`)
 - Git
 
 ## Local setup
@@ -18,7 +18,7 @@ in JavaScript and TypeScript test suites.
 2. Install dependencies from the repository root:
 
    ```bash
-   npm ci --force
+   npm ci
    ```
 
 3. Run the main quality gate:

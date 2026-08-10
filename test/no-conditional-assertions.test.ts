@@ -26,6 +26,24 @@ it("checks optional payload", () => {
             },
             {
                 code: `
+it("checks either payload shape", () => {
+    const payload = readPayload();
+
+    if (payload.kind === "success") {
+        expect(payload.value).toBeDefined();
+    } else {
+        expect(payload.error).toBeDefined();
+    }
+});
+                `,
+                errors: [
+                    { messageId: "conditionalAssertion" },
+                    { messageId: "conditionalAssertion" },
+                ],
+                name: "reports assertions inside both if/else branches",
+            },
+            {
+                code: `
 it("checks fallback payload", () => {
     const payload = readPayload();
 

@@ -70,6 +70,14 @@ const negativeTitlePattern =
 const notPropertyNames = new Set(["not"]);
 const promiseModifierNames = new Set(["rejects", "resolves"]);
 const rejectsPropertyNames = new Set(["rejects"]);
+const transparentExpressionWrapperTypes: ReadonlySet<AST_NODE_TYPES> = new Set([
+    AST_NODE_TYPES.ChainExpression,
+    AST_NODE_TYPES.TSAsExpression,
+    AST_NODE_TYPES.TSInstantiationExpression,
+    AST_NODE_TYPES.TSNonNullExpression,
+    AST_NODE_TYPES.TSSatisfiesExpression,
+    AST_NODE_TYPES.TSTypeAssertion,
+]);
 const traversalMetadataKeys = new Set([
     "comments",
     "loc",
@@ -139,6 +147,48 @@ const isFunctionLikeNode = (node: TSESTree.Node): node is FunctionLikeNode =>
     node.type === AST_NODE_TYPES.ArrowFunctionExpression ||
     node.type === AST_NODE_TYPES.FunctionDeclaration ||
     node.type === AST_NODE_TYPES.FunctionExpression;
+
+const isTransparentExpressionWrapper = (
+    node: TSESTree.Node,
+    expression: TSESTree.Node
+): boolean =>
+    isRecord(node) &&
+    setHas(transparentExpressionWrapperTypes, node.type) &&
+    node.expression === expression;
+
+const isImmediatelyInvokedFunction = (
+    // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- ESTree node types are supplied by typescript-eslint as mutable parser objects.
+    node: FunctionLikeNode
+): boolean => {
+    if (
+        node.type === AST_NODE_TYPES.FunctionDeclaration ||
+        (node.type === AST_NODE_TYPES.FunctionExpression && node.generator)
+    ) {
+        return false;
+    }
+
+    let current: TSESTree.Node = node;
+
+    while (isRecord(current)) {
+        const parent: unknown = current.parent;
+
+        if (!isAstNode(parent)) {
+            return false;
+        }
+
+        if (parent.type === AST_NODE_TYPES.CallExpression) {
+            return Object.is(parent.callee, current);
+        }
+
+        if (!isTransparentExpressionWrapper(parent, current)) {
+            return false;
+        }
+
+        current = parent;
+    }
+
+    return false;
+};
 
 const getPropertyName = (
     // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- ESTree node types are supplied by typescript-eslint as mutable parser objects.
@@ -383,7 +433,11 @@ function visitNodeOutsideNestedFunctions(
     seen.add(node);
     visitor(node);
 
-    if (node !== root && isFunctionLikeNode(node)) {
+    if (
+        node !== root &&
+        isFunctionLikeNode(node) &&
+        !isImmediatelyInvokedFunction(node)
+    ) {
         return;
     }
 
@@ -400,9 +454,9 @@ function visitNodeOutsideNestedFunctions(
 }
 
 /**
- * Visit descendants under a starting AST node without entering nested function
- * bodies. This keeps per-test and per-hook checks tied to code that actually
- * runs in that callback.
+ * Visit descendants under a starting AST node without entering deferred nested
+ * function bodies. Immediately invoked non-generator function literals are
+ * traversed because their bodies execute as part of the surrounding callback.
  */
 export const visitDescendantsOutsideNestedFunctions = (
     node: TSESTree.Node,
@@ -415,7 +469,7 @@ export const visitDescendantsOutsideNestedFunctions = (
  * Check whether a call expression is the root `expect(...)` call in an
  * assertion chain.
  */
-export const isExpectCall = (node: TSESTree.CallExpression): boolean =>
+const isExpectCall = (node: TSESTree.CallExpression): boolean =>
     node.callee.type === AST_NODE_TYPES.Identifier &&
     node.callee.name === "expect";
 
@@ -488,10 +542,10 @@ export const getAssertionMatcherCall = (
     const matcherName = getPropertyName(node.callee.property);
 
     if (
-        !isDefined(matcherName) ||
         matcherName === "not" ||
         matcherName === "resolves" ||
-        matcherName === "rejects"
+        matcherName === "rejects" ||
+        !isDefined(matcherName)
     ) {
         return undefined;
     }
@@ -526,10 +580,10 @@ const getAssertionMethodName = (
             const propertyName = getPropertyName(parent.property);
 
             if (
-                isDefined(propertyName) &&
                 propertyName !== "not" &&
                 propertyName !== "resolves" &&
-                propertyName !== "rejects"
+                propertyName !== "rejects" &&
+                isDefined(propertyName)
             ) {
                 return propertyName;
             }
@@ -660,7 +714,7 @@ export const summarizeAssertions = (
     let snapshotAssertionCount = 0;
     const unawaitedAsyncAssertionNodes: TSESTree.CallExpression[] = [];
 
-    visitDescendants(callback.body, (node) => {
+    visitDescendantsOutsideNestedFunctions(callback.body, (node) => {
         if (
             node.type !== AST_NODE_TYPES.CallExpression ||
             !isExpectCall(node)

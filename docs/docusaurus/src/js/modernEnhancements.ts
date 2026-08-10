@@ -4,7 +4,7 @@
  */
 
 type AdvancedFeaturesGlobal = typeof globalThis & {
-    initializeAdvancedFeatures?: () => void;
+    initializeAdvancedFeatures?: () => CleanupFunction;
 };
 
 /** Teardown callback returned by enhancement initializers. */
@@ -53,38 +53,46 @@ const SIDEBAR_TOKENIZED_DATA_KEY = "sbTokenized";
 function applySidebarLabelTokenColoring(): CleanupFunction {
     const mutations: SidebarLabelMutation[] = [];
 
+    const processLink = (link: HTMLAnchorElement): void => {
+        const linkLabel = link.textContent.trim();
+
+        if (
+            !linkLabel ||
+            isSidebarLinkTokenized(link) ||
+            !isRuntimeSidebarLink(link)
+        ) {
+            return;
+        }
+
+        const runtimePrefix = getRuntimeSidebarKindPrefix(linkLabel);
+
+        if (runtimePrefix === null) {
+            return;
+        }
+
+        const remainderText = linkLabel.slice(runtimePrefix.length).trimStart();
+
+        if (remainderText.length === 0) {
+            return;
+        }
+
+        mutations.push({
+            element: link,
+            originalLabel: linkLabel,
+        });
+
+        setSidebarLeadingToken({
+            link,
+            remainderText,
+            separator: "",
+            tokenClassName: "sb-inline-runtime-kind",
+            tokenText: `${runtimePrefix}\u{A0}`,
+        });
+    };
+
     const processLinks = (sidebarLinks: readonly HTMLAnchorElement[]): void => {
         for (const link of sidebarLinks) {
-            const linkLabel = link.textContent?.trim();
-
-            if (
-                !isSidebarLinkTokenized(link) &&
-                linkLabel &&
-                isRuntimeSidebarLink(link)
-            ) {
-                const runtimePrefix = getRuntimeSidebarKindPrefix(linkLabel);
-
-                if (runtimePrefix !== null) {
-                    const remainderText = linkLabel
-                        .slice(runtimePrefix.length)
-                        .trimStart();
-
-                    if (remainderText.length > 0) {
-                        mutations.push({
-                            element: link,
-                            originalLabel: linkLabel,
-                        });
-
-                        setSidebarLeadingToken({
-                            link,
-                            remainderText,
-                            separator: "",
-                            tokenClassName: "sb-inline-runtime-kind",
-                            tokenText: `${runtimePrefix}\u{A0}`,
-                        });
-                    }
-                }
-            }
+            processLink(link);
         }
     };
 
@@ -132,8 +140,11 @@ function applySidebarLabelTokenColoring(): CleanupFunction {
                               continue;
                           }
 
-                          if (addedNode.matches("a.menu__link")) {
-                              addedLinks.push(addedNode as HTMLAnchorElement);
+                          if (
+                              addedNode instanceof HTMLAnchorElement &&
+                              addedNode.matches("a.menu__link")
+                          ) {
+                              addedLinks.push(addedNode);
                           }
 
                           const nestedLinks =

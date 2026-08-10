@@ -5,6 +5,6 @@ about behavior.
 
 Use the rule docs for day-to-day adoption:
 
-- [Overview](../../rules/overview.md)
-- [Getting started](../../rules/getting-started.md)
-- [Presets](../../rules/presets/index.md)
+- [Overview](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/overview)
+- [Getting started](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/getting-started)
+- [Presets](https://nick2bad4u.github.io/eslint-plugin-test-signal/docs/rules/presets)

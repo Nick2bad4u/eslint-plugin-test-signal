@@ -17,6 +17,18 @@ it("loads data", async () => {
             errors: [{ messageId: "emptyAsyncTest" }],
             name: "reports async tests without assertions",
         },
+        {
+            code: `
+it("constructs a generator", async () => {
+    await loadData();
+    (function* () {
+        expect(transformData()).toBeDefined();
+    })();
+});
+            `,
+            errors: [{ messageId: "emptyAsyncTest" }],
+            name: "ignores assertions inside invoked generator functions",
+        },
     ],
     valid: [
         {
@@ -26,6 +38,15 @@ it("loads data", async () => {
 });
             `,
             name: "allows async tests with awaited assertions",
+        },
+        {
+            code: `
+it("checks transformed data", async () => {
+    await loadData();
+    (() => expect(transformData()).toBeDefined())();
+});
+            `,
+            name: "counts assertions inside immediately invoked helpers",
         },
         {
             code: `

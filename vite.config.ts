@@ -52,6 +52,7 @@ const testExcludePatterns = [
     "**/coverage/**",
     "**/dist/**",
     "**/node_modules/**",
+    "**/temp/**",
 ];
 /** Canonical test file include patterns for unit/integration suites. */
 const testFilePatterns = ["test/**/*.{test,spec}.{ts,tsx,js,mjs,cjs,mts,cts}"];
@@ -267,12 +268,8 @@ const vitestConfig: ReturnType<typeof defineConfig> = defineConfig({
             enabled: shouldEnableVitestTypecheck,
             exclude: [
                 "**/.{idea,git,cache,output,temp}/**",
-                "**/.cache/**",
-                "**/.stryker-tmp/**",
-                "**/coverage/**",
-                "**/dist/**",
                 "**/html/**",
-                "**/node_modules/**",
+                ...testExcludePatterns,
                 ...defaultExclude,
             ],
             ignoreSourceErrors: false,

@@ -18,7 +18,9 @@ const organizationName = "Nick2bad4u";
 /** Repository name used for edit links and project metadata. */
 const projectName = "eslint-plugin-test-signal";
 /** Public origin for the published documentation site. */
-const siteOrigin = "https://nick2bad4u.github.io";
+const siteOrigin = new URL(
+    "https://nick2bad4u.github.io/eslint-plugin-test-signal/"
+).origin;
 /** Canonical public site URL including the GitHub Pages project path. */
 const siteUrl = `${siteOrigin}${baseUrl}`;
 /** Global site description used for SEO and social cards. */
@@ -110,9 +112,12 @@ const suppressKnownWebpackWarningsPlugin: PluginModule = () => ({
                  * site-level problem.
                  */
                 (warning: unknown) => {
-                    const warningRecord = warning as
-                        Readonly<Record<string, unknown>> | undefined;
-                    const warningMessage = warningRecord?.["message"];
+                    const warningMessage =
+                        typeof warning === "object" &&
+                        warning !== null &&
+                        "message" in warning
+                            ? warning.message
+                            : undefined;
 
                     return (
                         typeof warningMessage === "string" &&

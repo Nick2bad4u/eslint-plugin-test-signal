@@ -786,6 +786,8 @@ coverage/
 *.pdf
 
 # Temporary files
+temp/
+.lychee.report.md
 **/*~
 **/*.tmp
 **/*.swp

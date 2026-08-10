@@ -4,6 +4,8 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
+// eslint-disable-next-line import-x/extensions -- Node requires the extension for JSON import attributes.
+import packageJson from "../package.json" with { type: "json" };
 import {
     testSignalConfigMetadataByName,
     testSignalConfigNames,
@@ -43,6 +45,9 @@ describe("source plugin config wiring", () => {
         }
 
         expect(plugin.meta.name).toBe("eslint-plugin-test-signal");
+        expect(plugin.meta.namespace).toBe("test-signal");
+        expect(plugin.meta.version).toBe(packageJson.version);
+        expect(plugin.processors).toStrictEqual({});
     });
 
     it("registers parser defaults, files, and plugin namespace", async () => {
@@ -69,5 +74,17 @@ describe("source plugin config wiring", () => {
             ecmaVersion: "latest",
             sourceType: "module",
         });
+
+        for (const configName of testSignalConfigNames) {
+            const config = plugin.configs[configName];
+
+            expect(config.plugins?.["test-signal"]).toStrictEqual({
+                rules: plugin.rules,
+            });
+            expect(config.languageOptions?.["parserOptions"]).toStrictEqual({
+                ecmaVersion: "latest",
+                sourceType: "module",
+            });
+        }
     });
 });
