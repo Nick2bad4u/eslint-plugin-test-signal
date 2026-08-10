@@ -160,7 +160,10 @@ const isImmediatelyInvokedFunction = (
     // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- ESTree node types are supplied by typescript-eslint as mutable parser objects.
     node: FunctionLikeNode
 ): boolean => {
-    if (node.type === AST_NODE_TYPES.FunctionDeclaration) {
+    if (
+        node.type === AST_NODE_TYPES.FunctionDeclaration ||
+        (node.type === AST_NODE_TYPES.FunctionExpression && node.generator)
+    ) {
         return false;
     }
 
@@ -452,8 +455,8 @@ function visitNodeOutsideNestedFunctions(
 
 /**
  * Visit descendants under a starting AST node without entering deferred nested
- * function bodies. Immediately invoked function literals are traversed because
- * their bodies execute as part of the surrounding callback.
+ * function bodies. Immediately invoked non-generator function literals are
+ * traversed because their bodies execute as part of the surrounding callback.
  */
 export const visitDescendantsOutsideNestedFunctions = (
     node: TSESTree.Node,

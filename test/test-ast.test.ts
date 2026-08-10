@@ -439,7 +439,7 @@ test("nested only", () => {
         ).toBe(false);
     });
 
-    it("enters directly invoked function literals but skips deferred callbacks", () => {
+    it("enters invoked functions but skips generators and deferred callbacks", () => {
         expect.hasAssertions();
 
         const fixture = parseFixture(`
@@ -448,13 +448,16 @@ test("function boundaries", () => {
     (function () {
         expect(functionValue).toBe(true);
     })();
+    (function* () {
+        expect(generatorValue).toBe(true);
+    })();
     ((() => expect(assertedValue).toBe(true)) as () => void)();
     later(() => expect(deferredValue).toBe(true));
 });
         `);
         const callback = getCallback(
             fixture,
-            'test("function boundaries", () => {\n    (() => expect(arrowValue).toBe(true))();\n    (function () {\n        expect(functionValue).toBe(true);\n    })();\n    ((() => expect(assertedValue).toBe(true)) as () => void)();\n    later(() => expect(deferredValue).toBe(true));\n})'
+            'test("function boundaries", () => {\n    (() => expect(arrowValue).toBe(true))();\n    (function () {\n        expect(functionValue).toBe(true);\n    })();\n    (function* () {\n        expect(generatorValue).toBe(true);\n    })();\n    ((() => expect(assertedValue).toBe(true)) as () => void)();\n    later(() => expect(deferredValue).toBe(true));\n})'
         );
         const visitedExpectCalls = new Set<string>();
 

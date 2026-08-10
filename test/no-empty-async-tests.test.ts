@@ -17,6 +17,18 @@ it("loads data", async () => {
             errors: [{ messageId: "emptyAsyncTest" }],
             name: "reports async tests without assertions",
         },
+        {
+            code: `
+it("constructs a generator", async () => {
+    await loadData();
+    (function* () {
+        expect(transformData()).toBeDefined();
+    })();
+});
+            `,
+            errors: [{ messageId: "emptyAsyncTest" }],
+            name: "ignores assertions inside invoked generator functions",
+        },
     ],
     valid: [
         {

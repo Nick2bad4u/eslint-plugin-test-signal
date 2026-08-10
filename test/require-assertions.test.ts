@@ -17,6 +17,17 @@ it("calls the subject", () => {
             errors: [{ messageId: "missingAssertion" }],
             name: "reports executable tests without assertions",
         },
+        {
+            code: `
+it("constructs a generator", () => {
+    (function* () {
+        expect(renderWidget().mode).toBe("compact");
+    })();
+});
+            `,
+            errors: [{ messageId: "missingAssertion" }],
+            name: "ignores assertions inside invoked generator functions",
+        },
     ],
     valid: [
         {

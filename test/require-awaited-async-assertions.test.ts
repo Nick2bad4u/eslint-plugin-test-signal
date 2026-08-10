@@ -56,6 +56,16 @@ it("returns resolved assertions", () => {
                 `,
                 name: "allows returned resolves assertions",
             },
+            {
+                code: `
+it("constructs a generator", () => {
+    (function* () {
+        expect(readToken("ok")).resolves.toEqual({ value: "ok" });
+    })();
+});
+                `,
+                name: "ignores async assertions inside invoked generator functions",
+            },
         ],
     }
 );
