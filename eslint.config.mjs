@@ -167,10 +167,8 @@ const config = [
     },
     {
         files: ["scripts/remark-lint-rule-doc-headings.mjs"],
-        name: "Rule Docs Heading Validator Complexity",
+        name: "Rule Docs Heading Validator Cache",
         rules: {
-            "sonarjs/cognitive-complexity": "off",
-            "sonarjs/cyclomatic-complexity": "off",
             "sonarjs/no-undefined-assignment": "off",
         },
     },
