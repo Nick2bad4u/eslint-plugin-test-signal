@@ -439,6 +439,43 @@ test("nested only", () => {
         ).toBe(false);
     });
 
+    it("enters directly invoked function literals but skips deferred callbacks", () => {
+        expect.hasAssertions();
+
+        const fixture = parseFixture(`
+test("function boundaries", () => {
+    (() => expect(arrowValue).toBe(true))();
+    (function () {
+        expect(functionValue).toBe(true);
+    })();
+    ((() => expect(assertedValue).toBe(true)) as () => void)();
+    later(() => expect(deferredValue).toBe(true));
+});
+        `);
+        const callback = getCallback(
+            fixture,
+            'test("function boundaries", () => {\n    (() => expect(arrowValue).toBe(true))();\n    (function () {\n        expect(functionValue).toBe(true);\n    })();\n    ((() => expect(assertedValue).toBe(true)) as () => void)();\n    later(() => expect(deferredValue).toBe(true));\n})'
+        );
+        const visitedExpectCalls = new Set<string>();
+
+        visitDescendantsOutsideNestedFunctions(callback.body, (node) => {
+            if (
+                node.type === AST_NODE_TYPES.CallExpression &&
+                isExpectLikeCall(node)
+            ) {
+                visitedExpectCalls.add(fixture.sourceFor(node));
+            }
+        });
+
+        expect(visitedExpectCalls).toStrictEqual(
+            new Set([
+                "expect(arrowValue)",
+                "expect(assertedValue)",
+                "expect(functionValue)",
+            ])
+        );
+    });
+
     it("resolves matcher calls and assertion-chain modifiers", () => {
         expect.hasAssertions();
 

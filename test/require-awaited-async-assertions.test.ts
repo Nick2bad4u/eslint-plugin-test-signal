@@ -29,6 +29,15 @@ it("resolves valid tokens", () => {
                 errors: [{ messageId: "unawaitedAsyncAssertion" }],
                 name: "reports floating resolves assertions",
             },
+            {
+                code: `
+it("resolves tokens in an immediate helper", () => {
+    (() => expect(readToken("ok")).resolves.toEqual({ value: "ok" }))();
+});
+                `,
+                errors: [{ messageId: "unawaitedAsyncAssertion" }],
+                name: "reports floating assertions inside immediately invoked helpers",
+            },
         ],
         valid: [
             {

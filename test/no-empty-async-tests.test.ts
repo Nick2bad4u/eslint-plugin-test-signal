@@ -29,6 +29,15 @@ it("loads data", async () => {
         },
         {
             code: `
+it("checks transformed data", async () => {
+    await loadData();
+    (() => expect(transformData()).toBeDefined())();
+});
+            `,
+            name: "counts assertions inside immediately invoked helpers",
+        },
+        {
+            code: `
 it("uses synchronous assertions", () => {
     expect(loadSync()).toBe("ok");
 });

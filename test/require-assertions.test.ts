@@ -29,6 +29,14 @@ it("renders compact mode", () => {
         },
         {
             code: `
+it("runs an immediate helper", () => {
+    (() => expect(renderWidget().mode).toBe("compact"))();
+});
+            `,
+            name: "counts assertions inside immediately invoked helpers",
+        },
+        {
+            code: `
 it.skip("tracks a known gap", () => {
     renderWidget({ mode: "compact" });
 });
