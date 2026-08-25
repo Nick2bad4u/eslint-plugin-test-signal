@@ -176,12 +176,11 @@ jobs:
               if: "${{ github.event_name != 'workflow_dispatch' || !inputs.skip_verify }}"
               run: "npm run release:check"
 
-            - name: "Ensure verification did not modify tracked files"
-              if: "startsWith(github.ref, 'refs/tags/v')"
+            - name: "Ensure verification preserved a clean worktree"
               run: |
                   set -euo pipefail
-                  if ! git diff --quiet || ! git diff --cached --quiet; then
-                    echo "release:check modified files on a tag-triggered release. Ensure main is clean before tagging." >&2
+                  if [ -n "$(git status --porcelain=v1 --untracked-files=all)" ]; then
+                    echo "release:check modified files. Commit generated or formatting updates before releasing." >&2
                     git status --short
                     exit 1
                   fi
@@ -262,9 +261,36 @@ jobs:
                     exit 1
                   fi
 
-                  git add -A
+                  unexpected_files=$(
+                    {
+                      git diff --name-only
+                      git diff --cached --name-only
+                      git ls-files --others --exclude-standard
+                    } | sort -u | grep -Ev '^(package.json|package-lock.json)$' || true
+                  )
+                  if [ -n "$unexpected_files" ]; then
+                    echo "Unexpected files changed while preparing the release:" >&2
+                    echo "$unexpected_files" >&2
+                    git status --short
+                    exit 1
+                  fi
+
+                  if git diff --quiet -- package.json || git diff --quiet -- package-lock.json; then
+                    echo "Expected npm version to modify both package.json and package-lock.json." >&2
+                    git status --short
+                    exit 1
+                  fi
+
+                  git add -- package.json package-lock.json
                   if git diff --cached --quiet; then
                     echo "No staged changes found for release commit." >&2
+                    exit 1
+                  fi
+
+                  unexpected_staged_files=$(git diff --cached --name-only -- . ':(exclude)package.json' ':(exclude)package-lock.json')
+                  if [ -n "$unexpected_staged_files" ]; then
+                    echo "Refusing to create a release commit with files outside the staging allowlist:" >&2
+                    printf '%s\n' "$unexpected_staged_files" >&2
                     exit 1
                   fi
 
