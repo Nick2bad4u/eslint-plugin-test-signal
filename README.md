@@ -12,6 +12,8 @@ The first rule set focuses on:
 - async tests without assertions;
 - suites that never exercise a negative path.
 
+> **Oxlint:** Compatible with Oxlint 1.80.0 across all 25 rules and six presets; the [JavaScript plugin API remains alpha](https://oxc.rs/docs/guide/usage/linter/js-plugins.html), so the release gate reruns ESLint/Oxlint conformance coverage.
+
 ## Table of contents
 
 1. [Installation](#installation)
